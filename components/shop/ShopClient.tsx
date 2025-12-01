@@ -20,7 +20,7 @@ const SORT_OPTIONS = [
 ];
 
 const GENDER_OPTIONS = [
-    { label: 'Hombre', value: 'Hombre' },
+    { label: 'Unisex', value: 'Unisex' },
     { label: 'Niño', value: 'Niño' },
 ];
 
@@ -88,6 +88,8 @@ export function ShopClient({ initialProducts, categories }: ShopClientProps) {
     // Sync URL parameters with state when they change
     useEffect(() => {
         setSelectedCategory(searchParams.get('category'));
+        const genderParam = searchParams.get('gender');
+        if (genderParam) setSelectedGender(genderParam);
         setIsFeatured(searchParams.get('featured') === 'true');
         setIsOnSale(searchParams.get('sale') === 'true');
         setIsNew(searchParams.get('new') === 'true');
@@ -136,7 +138,7 @@ export function ShopClient({ initialProducts, categories }: ShopClientProps) {
                         !productName.includes('junior')) {
                         return false;
                     }
-                } else if (selectedGender === 'Hombre') {
+                } else if (selectedGender === 'Unisex') {
                     if (productName.includes('kids') ||
                         productName.includes('niño') ||
                         productName.includes('niños') ||

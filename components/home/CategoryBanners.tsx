@@ -4,7 +4,7 @@ import Image from "next/image";
 
 export default function CategoryBanners() {
   const banners = [
-    { title: "Colección Hombre", img: "/placeholder-image.png", href: "/tienda?hombre" },
+    { title: "Colección Unisex", img: "/placeholder-image.png", href: "/tienda?gender=Unisex" },
     { title: "Colección Mujer", img: "/placeholder-image.png", href: "/tienda?mujer" },
     { title: "Colección Niños", img: "/placeholder-image.png", href: "/tienda?ninos" },
   ];
@@ -22,8 +22,8 @@ export default function CategoryBanners() {
                 (idx === 0
                   ? 'border-t-[5px] border-r-[5px] border-white'
                   : idx === 1
-                  ? 'border-t-[5px] border-white'
-                  : 'border-t-[5px] border-l-[5px] border-white')
+                    ? 'border-t-[5px] border-white'
+                    : 'border-t-[5px] border-l-[5px] border-white')
               }
             >
               <div className="relative w-full h-48 md:h-64">
