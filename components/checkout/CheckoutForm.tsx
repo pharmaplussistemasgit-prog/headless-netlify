@@ -29,7 +29,7 @@ export default function CheckoutForm() {
     // Shipping State
     const [shippingCost, setShippingCost] = useState(0);
     const [shippingMessage, setShippingMessage] = useState('');
-    const [shippingZone, setShippingZone] = useState('nacional'); // Default: nacional
+    const [shippingZone, setShippingZone] = useState(''); // Default: empty to force selection
 
     const totalQuantity = items.reduce((acc, item) => acc + item.quantity, 0);
 
@@ -46,13 +46,15 @@ export default function CheckoutForm() {
 
             // Base rates (up to 3 kg)
             const baseRates = {
-                bogota: 5000,
+                recoger: 0,
+                bogota: 10000,
                 cercanos: 15000,
                 nacional: 25000
             };
 
             // Additional cost per kg after 3 kg
             const additionalRates = {
+                recoger: 0,
                 bogota: 3000,
                 cercanos: 3000,
                 nacional: 8000
@@ -123,6 +125,12 @@ export default function CheckoutForm() {
         try {
             if (!customerData.firstName || !customerData.lastName || !customerData.email || !customerData.phone) {
                 toast.error('Por favor completa todos los campos obligatorios');
+                setIsLoading(false);
+                return;
+            }
+
+            if (!shippingZone) {
+                toast.error('Por favor selecciona una zona de envío');
                 setIsLoading(false);
                 return;
             }
@@ -334,9 +342,11 @@ export default function CheckoutForm() {
                                             <select
                                                 value={shippingZone}
                                                 onChange={(e) => setShippingZone(e.target.value)}
-                                                className="w-full px-4 py-3 bg-gray-50 border-b-2 border-gray-200 focus:border-black outline-none text-sm font-medium appearance-none cursor-pointer hover:bg-gray-100 transition-colors"
+                                                className={`w-full px-4 py-3 bg-gray-50 border-b-2 outline-none text-sm font-medium appearance-none cursor-pointer hover:bg-gray-100 transition-colors ${!shippingZone ? 'border-red-500 text-gray-500' : 'border-gray-200 focus:border-black'}`}
                                             >
-                                                <option value="bogota">Bogotá D.C. - Desde $5.000</option>
+                                                <option value="" disabled>-- Selecciona una opción --</option>
+                                                <option value="recoger">Recoger en Tienda - Gratis</option>
+                                                <option value="bogota">Bogotá D.C. - Desde $10.000</option>
                                                 <option value="cercanos">Alrededores a Bogotá - Desde $15.000</option>
                                                 <option value="nacional">Nacional - Desde $25.000</option>
                                             </select>
@@ -350,6 +360,14 @@ export default function CheckoutForm() {
                                             <p className="text-[10px] text-gray-500 leading-tight bg-gray-50 p-2 border-l-2 border-black">
                                                 Incluye: Cajicá, Chía, Funza, Facatativá, La Calera, Mosquera
                                             </p>
+                                        )}
+
+                                        {shippingZone && shippingZone !== 'recoger' && (
+                                            <div className="bg-orange-50 border-l-2 border-orange-500 p-2">
+                                                <p className="text-[10px] text-orange-800 leading-tight">
+                                                    <strong>¡Importante!</strong> Si la ciudad de entrega no coincide con la zona seleccionada, el pedido no será despachado.
+                                                </p>
+                                            </div>
                                         )}
 
                                         <div className="text-xs text-gray-500 pt-1">

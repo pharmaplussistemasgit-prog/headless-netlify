@@ -56,6 +56,13 @@ export async function POST(request: Request) {
                     key: '_billing_cedula',
                     value: customer.documentId
                 }
+            ],
+            shipping_lines: [
+                {
+                    method_id: 'flat_rate',
+                    method_title: customer.shippingZone === 'recoger' ? 'Recoger en Tienda' : 'Envío',
+                    total: String(body.shippingCost || 0)
+                }
             ]
         };
 
