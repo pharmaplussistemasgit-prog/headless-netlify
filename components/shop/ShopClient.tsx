@@ -102,11 +102,16 @@ export function ShopClient({ initialProducts, categories }: ShopClientProps) {
     // Build category tree
     const categoryTree = useMemo(() => {
         return categories
-            .filter(c => c.parent === 0)
-            .map(parent => ({
-                ...parent,
-                children: categories.filter(c => c.parent === parent.id)
-            }));
+            .filter(c => c.parent === 0 && !c.name.toLowerCase().includes('nacionales'))
+            .map(parent => {
+                const children = categories.filter(c => c.parent === parent.id && !c.name.toLowerCase().includes('nacionales'));
+                // Deduplicate children by name
+                const uniqueChildren = Array.from(new Map(children.map(item => [item.name, item])).values());
+                return {
+                    ...parent,
+                    children: uniqueChildren
+                };
+            });
     }, [categories]);
 
     // Filter products logic -FIXED

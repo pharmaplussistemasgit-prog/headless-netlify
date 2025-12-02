@@ -3,10 +3,9 @@
 import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
 import { Sheet, SheetTrigger, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
-import { Search, User, ShoppingCart, Heart, ChevronDown, ChevronRight } from "lucide-react";
+import { Search, User, ShoppingCart, Heart, ChevronRight } from "lucide-react";
 import { IoMenuOutline } from "react-icons/io5";
 import { IoLogoWhatsapp } from "react-icons/io5";
-import { Collapsible, CollapsibleTrigger, CollapsibleContent } from "@/components/ui/collapsible";
 import SaprixLogo from "@/components/ui/SaprixLogo";
 
 export default function HeaderMobile() {
@@ -36,20 +35,7 @@ export default function HeaderMobile() {
 
               <Link href="/tienda" className="block rounded-md px-3 py-3 text-lg font-semibold hover:bg-neutral-100">Tienda</Link>
 
-              <Collapsible>
-                <CollapsibleTrigger className="rounded-md hover:bg-neutral-100">
-                  <span>Blog</span>
-                  <ChevronDown className="h-5 w-5 text-gray-700" />
-                </CollapsibleTrigger>
-                <CollapsibleContent>
-                  <div className="space-y-1 px-3 py-2">
-                    <Link href="/blog/noticias" className="block rounded-md px-3 py-2 text-sm hover:bg-neutral-100">Noticias</Link>
-                    <Link href="/blog/guias" className="block rounded-md px-3 py-2 text-sm hover:bg-neutral-100">Guías</Link>
-                  </div>
-                </CollapsibleContent>
-              </Collapsible>
-
-              <Link href="/contacto" className="block rounded-md px-3 py-3 text-lg font-semibold hover:bg-neutral-100">Contacto</Link>
+              <Link href="/blog" className="block rounded-md px-3 py-3 text-lg font-semibold hover:bg-neutral-100">Blog</Link>
             </nav>
           </SheetContent>
         </Sheet>

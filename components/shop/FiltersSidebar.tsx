@@ -89,10 +89,12 @@ export function FiltersSidebar({
   };
 
   // Build Category Tree
-  const categoryTree = categories.filter(c => c.parent === 0).map(parent => ({
-    ...parent,
-    children: categories.filter(c => c.parent === parent.id)
-  }));
+  const categoryTree = categories
+    .filter(c => c.parent === 0 && !c.name.toLowerCase().includes('nacionales'))
+    .map(parent => ({
+      ...parent,
+      children: categories.filter(c => c.parent === parent.id && !c.name.toLowerCase().includes('nacionales'))
+    }));
 
   // Find Attributes
   const colorAttr = attributes.find(a => a.attribute.slug.includes("color") || a.attribute.name.toLowerCase().includes("color"));

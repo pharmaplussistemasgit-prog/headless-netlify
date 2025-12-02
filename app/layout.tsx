@@ -9,6 +9,7 @@ import FutsalHeader from "@/components/layout/FutsalHeader";
 
 import DixorFooter from "@/components/layout/Footer";
 import { CartProvider } from "@/context/CartContext";
+import { WishlistProvider } from "@/context/WishlistContext";
 import CartDrawer from "@/components/cart/CartDrawer";
 import { Toaster } from "sonner";
 import WhatsAppButton from "@/components/ui/WhatsAppButton";
@@ -47,17 +48,19 @@ export default function RootLayout({
           disableTransitionOnChange={false}
         >
           <CartProvider>
-            <div className="flex flex-col min-h-screen">
-              <CustomCursor />
-              <TabNotifier />
-              <HeaderMobileClient />
-              <FutsalHeader />
-              <main className="flex-grow">{children}</main>
-              <DixorFooter />
-              <CartDrawer />
-              <WhatsAppButton />
-            </div>
-            <Toaster position="top-right" richColors />
+            <WishlistProvider>
+              <div className="flex flex-col min-h-screen">
+                <CustomCursor />
+                <TabNotifier />
+                <HeaderMobileClient />
+                <FutsalHeader />
+                <main className="flex-grow">{children}</main>
+                <DixorFooter />
+                <CartDrawer />
+                <WhatsAppButton />
+              </div>
+              <Toaster position="top-right" richColors />
+            </WishlistProvider>
           </CartProvider>
         </ThemeProvider>
       </body>

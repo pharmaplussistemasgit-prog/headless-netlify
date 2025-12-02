@@ -61,8 +61,20 @@ export default function FeaturedCategories({ categories }: FeaturedCategoriesPro
             const found = categories.find(c =>
                 !usedIds.has(c.id) && c.name.toLowerCase().includes(term)
             );
+
             if (found) {
-                selected.push(found);
+                // Si encontramos "Zapatillas Nacionales" (o cualquier variante que coincida con "zapatillas"),
+                // lo transformamos visualmente a "Zapatillas" genérico
+                if (term === 'zapatillas' && found.name.toLowerCase().includes('nacionales')) {
+                    const modifiedCategory = {
+                        ...found,
+                        name: 'Zapatillas',
+                        slug: 'zapatillas' // Forzamos el slug a la categoría general
+                    };
+                    selected.push(modifiedCategory);
+                } else {
+                    selected.push(found);
+                }
                 usedIds.add(found.id);
             }
         });
@@ -112,7 +124,7 @@ export default function FeaturedCategories({ categories }: FeaturedCategoriesPro
                     transition={{ duration: 0.6 }}
                     className="text-center mb-16"
                 >
-                    <h2 className={`${jost.className} text-5xl sm:text-6xl font-bold mb-4 text-gray-900 dark:text-white`}>
+                    <h2 className={`${jost.className} text-5xl sm:text-6xl font-bold mb-4 text-gray-900 dark:text-white italic`}>
                         Explora por Categoría
                     </h2>
                     <p className="text-xl text-gray-600 dark:text-gray-300 max-w-2xl mx-auto">

@@ -24,10 +24,10 @@ async function getHeroProducts() {
 
 async function getFeaturedProducts() {
   try {
-    const resp = await wcFetchRaw<any[]>("products", { per_page: 6, featured: true, status: "publish" }, 600);
+    const resp = await wcFetchRaw<any[]>("products", { per_page: 12, featured: true, status: "publish" }, 600);
     const products = Array.isArray(resp.data) ? resp.data : [];
     if (products.length > 0) return products;
-    const fallback = await wcFetchRaw<any[]>("products", { per_page: 6, orderby: "date", order: "desc", status: "publish" }, 600);
+    const fallback = await wcFetchRaw<any[]>("products", { per_page: 12, orderby: "date", order: "desc", status: "publish" }, 600);
     const fallbackProducts = Array.isArray(fallback.data) ? fallback.data : [];
     return fallbackProducts;
   } catch (error) {
@@ -61,6 +61,7 @@ export default async function HomePage() {
       {products && products.length > 0 && (
         <ProductShowcase
           products={products}
+          categories={categories}
           title="Productos Destacados"
           subtitle="Lo mejor de nuestra colección seleccionado para ti"
         />

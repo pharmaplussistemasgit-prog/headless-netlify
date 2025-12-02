@@ -16,6 +16,7 @@ import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger, SheetClose 
 import { Input } from "@/components/ui/input";
 import { useTheme } from "next-themes"; // Importar useTheme
 import { useCart } from "@/context/CartContext";
+import { useWishlist } from "@/context/WishlistContext";
 
 
 // Paleta Saprix: fondo azul de marca, texto blanco en azules y hover rojo‑naranja
@@ -131,22 +132,13 @@ export default function FutsalHeader() {
   }, []);
   const [showCatMenu, setShowCatMenu] = useState(false);
   const [selectedCat, setSelectedCat] = useState<{ name: string; slug: string } | null>(null);
-  const [wishlistCount, setWishlistCount] = useState(0);
+  const { wishlistCount } = useWishlist();
   const wrapRef = useRef<HTMLDivElement | null>(null);
   const accountBtnRef = useRef<HTMLButtonElement | null>(null);
   const [hoverNav, setHoverNav] = useState<string | null>(null);
 
   useEffect(() => {
-    try {
-      const wc = parseInt(localStorage.getItem("wishlistCount") || "0");
-      setWishlistCount(isNaN(wc) ? 0 : wc);
-    } catch { }
-    const handler = (e: StorageEvent) => {
-      if (e.key === "wishlistCount") setWishlistCount(parseInt(e.newValue || "0") || 0);
-    };
-    window.addEventListener("storage", handler);
     setMounted(true); // Marcar como montado
-    return () => window.removeEventListener("storage", handler);
   }, []);
 
   useEffect(() => {
@@ -699,7 +691,6 @@ export default function FutsalHeader() {
                 { name: "Inicio", href: "/" },
                 { name: "Productos", href: "/tienda" },
                 { name: "Blog", href: "/blog" },
-                { name: "Contacto", href: "/contacto" },
               ].map((item, idx, arr) => (
                 <div key={item.name} className="flex items-center">
                   <Link href={item.href} className="text-white font-semibold hover:text-saprix-red-orange">
@@ -733,7 +724,7 @@ export default function FutsalHeader() {
                     <span className="absolute -top-2 -right-4 inline-flex h-5 w-5 items-center justify-center rounded-full bg-[#f42121] text-xs text-white">{String(contextCartCount).padStart(2, "0")}</span>
                   </motion.button>
                 </SheetTrigger>
-                <SheetContent side="right" className="w-full sm:w-[480px] p-0 flex flex-col">
+                <SheetContent side="right" className="w-full sm:w-[480px] p-0 flex flex-col" hideClose>
                   <SheetHeader className="flex flex-row items-center justify-between border-b border-gray-200 dark:border-gray-800 px-6 py-4 bg-white dark:bg-gray-900 space-y-0">
                     <div className="flex items-center gap-2">
                       <ShoppingCart size={20} className="text-saprix-electric-blue" />

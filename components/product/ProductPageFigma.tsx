@@ -260,13 +260,13 @@ export default function ProductPageFigma({ mapped, images, colorOptions, sizeOpt
                       <Ruler className="w-3 h-3" /> Guía de tallas
                     </button>
                   </div>
-                  <div className="grid grid-cols-4 sm:grid-cols-5 gap-2">
+                  <div className="flex flex-wrap gap-2">
                     {sizeAvailability.map((sz) => (
                       <button
                         key={sz.option}
                         onClick={() => setSelectedSize(sz.option)}
                         disabled={!sz.available}
-                        className={`h-10 text-sm font-medium transition-all border ${selectedSize === sz.option
+                        className={`h-10 min-w-[3.5rem] px-2 text-sm font-medium transition-all border ${selectedSize === sz.option
                           ? "bg-black text-white border-black"
                           : sz.available
                             ? "bg-white text-black border-gray-300 hover:border-black"
