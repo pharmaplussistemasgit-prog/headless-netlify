@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion, AnimatePresence, Variants } from 'framer-motion';
 import Link from 'next/link';
 import ProductCard from '@/components/product/ProductCard';
 import { Category } from '@/types/woocommerce';
@@ -68,7 +68,7 @@ export default function ProductShowcase({
     // Tomar los primeros 8 productos (para 2 filas de 4)
     const displayProducts = filteredProducts.slice(0, 8);
 
-    const containerVariants = {
+    const containerVariants: Variants = {
         hidden: { opacity: 0 },
         visible: {
             opacity: 1,
@@ -78,7 +78,7 @@ export default function ProductShowcase({
         },
     };
 
-    const itemVariants = {
+    const itemVariants: Variants = {
         hidden: { opacity: 0, y: 30 },
         visible: {
             opacity: 1,
@@ -123,8 +123,8 @@ export default function ProductShowcase({
                                 key={category.id}
                                 onClick={() => setSelectedCategory(category.slug)}
                                 className={`px-8 py-2 transform -skew-x-[3deg] italic font-bold tracking-wide transition-all duration-300 whitespace-nowrap ${selectedCategory === category.slug
-                                        ? 'bg-saprix-electric-blue text-white shadow-lg scale-105'
-                                        : 'bg-white text-gray-600 hover:bg-gray-100 dark:bg-gray-700 dark:text-gray-300 dark:hover:bg-gray-600 border border-gray-200 dark:border-gray-600 hover:border-saprix-electric-blue'
+                                    ? 'bg-saprix-electric-blue text-white shadow-lg scale-105'
+                                    : 'bg-white text-gray-600 hover:bg-gray-100 dark:bg-gray-700 dark:text-gray-300 dark:hover:bg-gray-600 border border-gray-200 dark:border-gray-600 hover:border-saprix-electric-blue'
                                     }`}
                             >
                                 <span className="block transform skew-x-[3deg]">{category.name}</span>
