@@ -280,6 +280,13 @@ export default function ProductPageFigma({ mapped, images, colorOptions, sizeOpt
                 </div>
               )}
 
+              {/* Stock Availability */}
+              {!isOutOfStock && typeof variationStock === 'number' && (
+                <div className="text-sm text-green-600 font-medium pb-2">
+                  {variationStock} disponibles
+                </div>
+              )}
+
               {/* Actions */}
               <div className="space-y-4 pt-4 border-t border-gray-100">
                 <div className="flex gap-4">

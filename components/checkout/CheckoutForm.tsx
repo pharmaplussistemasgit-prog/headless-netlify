@@ -21,9 +21,23 @@ export default function CheckoutForm() {
         phone: '',
         documentId: '',
         address: '',
+        apartment: '',
         city: '',
         state: '',
         postcode: ''
+    });
+
+    // Billing State
+    const [sameAsShipping, setSameAsShipping] = useState(true);
+    const [billingAddress, setBillingAddress] = useState({
+        firstName: '',
+        lastName: '',
+        address: '',
+        apartment: '',
+        city: '',
+        state: '',
+        postcode: '',
+        phone: ''
     });
 
     // Shipping State
@@ -94,9 +108,16 @@ export default function CheckoutForm() {
         fetchRecommended();
     }, [items]);
 
-    const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
         setCustomerData({
             ...customerData,
+            [e.target.name]: e.target.value
+        });
+    };
+
+    const handleBillingInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
+        setBillingAddress({
+            ...billingAddress,
             [e.target.name]: e.target.value
         });
     };
@@ -141,6 +162,19 @@ export default function CheckoutForm() {
                 return;
             }
 
+            const billingData = sameAsShipping ? {
+                ...customerData,
+                address_1: customerData.address,
+                address_2: customerData.apartment,
+                country: 'CO'
+            } : {
+                ...billingAddress,
+                address_1: billingAddress.address,
+                address_2: billingAddress.apartment,
+                email: customerData.email, // Use main email for contact
+                country: 'CO'
+            };
+
             const response = await fetch('/api/checkout/process-payment', {
                 method: 'POST',
                 headers: {
@@ -148,7 +182,14 @@ export default function CheckoutForm() {
                 },
                 body: JSON.stringify({
                     cartItems: items,
-                    customer: { ...customerData, shippingZone },
+                    customer: {
+                        ...customerData,
+                        shippingZone,
+                        address_1: customerData.address,
+                        address_2: customerData.apartment,
+                        country: 'CO'
+                    },
+                    billing: billingData,
                     cartTotal: finalTotal,
                     shippingCost: shippingCost,
                 }),
@@ -463,6 +504,15 @@ export default function CheckoutForm() {
                             </h3>
 
                             <div className="space-y-6">
+                                {/* Country Field - Read Only */}
+                                <div className="space-y-2">
+                                    <label className="block text-xs font-bold uppercase text-gray-700">
+                                        País / Región
+                                    </label>
+                                    <div className="w-full px-4 py-3 bg-gray-100 border-b-2 border-gray-200 text-gray-600 cursor-not-allowed">
+                                        Colombia
+                                    </div>
+                                </div>
                                 <div className="grid grid-cols-2 gap-6">
                                     <div className="space-y-2">
                                         <label className="block text-xs font-bold uppercase text-gray-700">
@@ -547,8 +597,23 @@ export default function CheckoutForm() {
                                         name="address"
                                         value={customerData.address}
                                         onChange={handleInputChange}
+                                        required
                                         className="w-full px-4 py-3 bg-gray-50 border-b-2 border-gray-200 focus:border-black outline-none transition-colors placeholder:text-gray-400"
                                         placeholder="Calle, Carrera, #, Apto..."
+                                    />
+                                </div>
+
+                                <div className="space-y-2">
+                                    <label className="block text-xs font-bold uppercase text-gray-700">
+                                        Apartamento, habitación, etc. (opcional)
+                                    </label>
+                                    <input
+                                        type="text"
+                                        name="apartment"
+                                        value={customerData.apartment}
+                                        onChange={handleInputChange}
+                                        className="w-full px-4 py-3 bg-gray-50 border-b-2 border-gray-200 focus:border-black outline-none transition-colors placeholder:text-gray-400"
+                                        placeholder="Apartamento, unidad, etc."
                                     />
                                 </div>
 
@@ -580,6 +645,152 @@ export default function CheckoutForm() {
                                         />
                                     </div>
                                 </div>
+
+                                <div className="space-y-2">
+                                    <label className="block text-xs font-bold uppercase text-gray-700">
+                                        Código postal (opcional)
+                                    </label>
+                                    <input
+                                        type="text"
+                                        name="postcode"
+                                        value={customerData.postcode}
+                                        onChange={handleInputChange}
+                                        className="w-full px-4 py-3 bg-gray-50 border-b-2 border-gray-200 focus:border-black outline-none transition-colors placeholder:text-gray-400"
+                                        placeholder="Código postal"
+                                    />
+                                </div>
+
+                                {/* Billing Address Toggle */}
+                                <div className="pt-6 border-t border-gray-100">
+                                    <label className="flex items-center gap-3 cursor-pointer group">
+                                        <div className="relative flex items-center">
+                                            <input
+                                                type="checkbox"
+                                                checked={sameAsShipping}
+                                                onChange={(e) => setSameAsShipping(e.target.checked)}
+                                                className="peer h-5 w-5 cursor-pointer appearance-none border-2 border-gray-300 bg-white transition-all checked:border-black checked:bg-black hover:border-black"
+                                            />
+                                            <div className="pointer-events-none absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 text-white opacity-0 peer-checked:opacity-100">
+                                                <svg xmlns="http://www.w3.org/2000/svg" className="h-3.5 w-3.5" viewBox="0 0 20 20" fill="currentColor">
+                                                    <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                                                </svg>
+                                            </div>
+                                        </div>
+                                        <span className="text-sm font-medium text-gray-700">Usar la misma dirección para facturación</span>
+                                    </label>
+                                </div>
+
+                                {/* Billing Address Form */}
+                                {!sameAsShipping && (
+                                    <div className="space-y-6 pt-6 animate-in fade-in slide-in-from-top-4 duration-300">
+                                        <h3 className="text-lg font-black uppercase italic text-black border-b border-gray-200 pb-2">
+                                            Dirección de Facturación
+                                        </h3>
+
+                                        <div className="space-y-2">
+                                            <label className="block text-xs font-bold uppercase text-gray-700">País / Región</label>
+                                            <div className="w-full px-4 py-3 bg-gray-100 border-b-2 border-gray-200 text-gray-600 cursor-not-allowed">Colombia</div>
+                                        </div>
+
+                                        <div className="grid grid-cols-2 gap-6">
+                                            <div className="space-y-2">
+                                                <label className="block text-xs font-bold uppercase text-gray-700">Nombre *</label>
+                                                <input
+                                                    type="text"
+                                                    name="firstName"
+                                                    value={billingAddress.firstName}
+                                                    onChange={handleBillingInputChange}
+                                                    required={!sameAsShipping}
+                                                    className="w-full px-4 py-3 bg-gray-50 border-b-2 border-gray-200 focus:border-black outline-none transition-colors placeholder:text-gray-400"
+                                                />
+                                            </div>
+                                            <div className="space-y-2">
+                                                <label className="block text-xs font-bold uppercase text-gray-700">Apellido *</label>
+                                                <input
+                                                    type="text"
+                                                    name="lastName"
+                                                    value={billingAddress.lastName}
+                                                    onChange={handleBillingInputChange}
+                                                    required={!sameAsShipping}
+                                                    className="w-full px-4 py-3 bg-gray-50 border-b-2 border-gray-200 focus:border-black outline-none transition-colors placeholder:text-gray-400"
+                                                />
+                                            </div>
+                                        </div>
+
+                                        <div className="space-y-2">
+                                            <label className="block text-xs font-bold uppercase text-gray-700">Dirección *</label>
+                                            <input
+                                                type="text"
+                                                name="address"
+                                                value={billingAddress.address}
+                                                onChange={handleBillingInputChange}
+                                                required={!sameAsShipping}
+                                                className="w-full px-4 py-3 bg-gray-50 border-b-2 border-gray-200 focus:border-black outline-none transition-colors placeholder:text-gray-400"
+                                                placeholder="Calle, Carrera, #, Apto..."
+                                            />
+                                        </div>
+
+                                        <div className="space-y-2">
+                                            <label className="block text-xs font-bold uppercase text-gray-700">Apartamento, habitación, etc. (opcional)</label>
+                                            <input
+                                                type="text"
+                                                name="apartment"
+                                                value={billingAddress.apartment}
+                                                onChange={handleBillingInputChange}
+                                                className="w-full px-4 py-3 bg-gray-50 border-b-2 border-gray-200 focus:border-black outline-none transition-colors placeholder:text-gray-400"
+                                            />
+                                        </div>
+
+                                        <div className="grid grid-cols-2 gap-6">
+                                            <div className="space-y-2">
+                                                <label className="block text-xs font-bold uppercase text-gray-700">Ciudad *</label>
+                                                <input
+                                                    type="text"
+                                                    name="city"
+                                                    value={billingAddress.city}
+                                                    onChange={handleBillingInputChange}
+                                                    required={!sameAsShipping}
+                                                    className="w-full px-4 py-3 bg-gray-50 border-b-2 border-gray-200 focus:border-black outline-none transition-colors placeholder:text-gray-400"
+                                                />
+                                            </div>
+                                            <div className="space-y-2">
+                                                <label className="block text-xs font-bold uppercase text-gray-700">Departamento *</label>
+                                                <input
+                                                    type="text"
+                                                    name="state"
+                                                    value={billingAddress.state}
+                                                    onChange={handleBillingInputChange}
+                                                    required={!sameAsShipping}
+                                                    className="w-full px-4 py-3 bg-gray-50 border-b-2 border-gray-200 focus:border-black outline-none transition-colors placeholder:text-gray-400"
+                                                />
+                                            </div>
+                                        </div>
+
+                                        <div className="grid grid-cols-2 gap-6">
+                                            <div className="space-y-2">
+                                                <label className="block text-xs font-bold uppercase text-gray-700">Código postal (opcional)</label>
+                                                <input
+                                                    type="text"
+                                                    name="postcode"
+                                                    value={billingAddress.postcode}
+                                                    onChange={handleBillingInputChange}
+                                                    className="w-full px-4 py-3 bg-gray-50 border-b-2 border-gray-200 focus:border-black outline-none transition-colors placeholder:text-gray-400"
+                                                />
+                                            </div>
+                                            <div className="space-y-2">
+                                                <label className="block text-xs font-bold uppercase text-gray-700">Teléfono *</label>
+                                                <input
+                                                    type="tel"
+                                                    name="phone"
+                                                    value={billingAddress.phone}
+                                                    onChange={handleBillingInputChange}
+                                                    required={!sameAsShipping}
+                                                    className="w-full px-4 py-3 bg-gray-50 border-b-2 border-gray-200 focus:border-black outline-none transition-colors placeholder:text-gray-400"
+                                                />
+                                            </div>
+                                        </div>
+                                    </div>
+                                )}
                             </div>
                         </div>
                     </div>

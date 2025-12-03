@@ -187,6 +187,7 @@ function buildUrl(endpoint: string, params: Record<string, unknown> = {}): strin
 
 export async function wcFetchRaw<T>(endpoint: string, params: Record<string, unknown> = {}, revalidate = 600): Promise<{ data: T; headers: Headers }> {
   const url = buildUrl(endpoint, params);
+  console.log(`[WooCommerce] Fetching: ${url}`);
 
   const fetchOptions: RequestInit = {};
   if (revalidate === 0) {
@@ -195,17 +196,23 @@ export async function wcFetchRaw<T>(endpoint: string, params: Record<string, unk
     fetchOptions.next = { revalidate };
   }
 
-  const res = await fetch(url, fetchOptions);
-  if (!res.ok) {
-    const msg = `WooCommerce fetch failed: ${res.status} ${res.statusText}`;
-    if (res.status === 401 || res.status === 403) {
-      console.warn(`${msg}. Verifica WOOCOMMERCE_API_URL, WOOCOMMERCE_CONSUMER_KEY y WOOCOMMERCE_CONSUMER_SECRET.`);
-      return { data: [] as unknown as T, headers: res.headers };
+  try {
+    const res = await fetch(url, fetchOptions);
+    if (!res.ok) {
+      const msg = `WooCommerce fetch failed: ${res.status} ${res.statusText}`;
+      if (res.status === 401 || res.status === 403) {
+        console.warn(`${msg}. Verifica WOOCOMMERCE_API_URL, WOOCOMMERCE_CONSUMER_KEY y WOOCOMMERCE_CONSUMER_SECRET.`);
+        return { data: [] as unknown as T, headers: res.headers };
+      }
+      throw new Error(msg);
     }
-    throw new Error(msg);
+    const data = (await res.json()) as T;
+    return { data, headers: res.headers };
+  } catch (error: any) {
+    console.error(`[WooCommerce] Fetch Error for ${url}:`, error);
+    if (error?.cause) console.error(`[WooCommerce] Cause:`, error.cause);
+    throw error;
   }
-  const data = (await res.json()) as T;
-  return { data, headers: res.headers };
 }
 
 async function wcFetchAll<T>(endpoint: string, params: Record<string, unknown> = {}, revalidate = 600): Promise<T[]> {

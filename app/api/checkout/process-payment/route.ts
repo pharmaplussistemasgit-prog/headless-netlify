@@ -13,7 +13,7 @@ const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000";
 export async function POST(request: Request) {
     try {
         const body = await request.json();
-        const { customer, cartItems, cartTotal } = body;
+        const { customer, billing, cartItems, cartTotal } = body;
 
         if (!customer || !cartItems || cartItems.length === 0) {
             return NextResponse.json({ error: 'Datos inválidos' }, { status: 400 });
@@ -31,23 +31,25 @@ export async function POST(request: Request) {
             payment_method_title: 'Pago con Wompi',
             set_paid: false,
             billing: {
-                first_name: customer.firstName,
-                last_name: customer.lastName,
-                address_1: customer.address,
-                city: customer.city,
-                state: customer.state,
-                postcode: customer.postcode,
+                first_name: billing?.firstName || customer.firstName,
+                last_name: billing?.lastName || customer.lastName,
+                address_1: billing?.address || customer.address,
+                address_2: billing?.apartment || customer.apartment || '',
+                city: billing?.city || customer.city,
+                state: billing?.state || customer.state,
+                postcode: billing?.postcode || customer.postcode || '',
                 country: 'CO',
-                email: customer.email,
-                phone: customer.phone,
+                email: billing?.email || customer.email,
+                phone: billing?.phone || customer.phone,
             },
             shipping: {
                 first_name: customer.firstName,
                 last_name: customer.lastName,
                 address_1: customer.address,
+                address_2: customer.apartment || '',
                 city: customer.city,
                 state: customer.state,
-                postcode: customer.postcode,
+                postcode: customer.postcode || '',
                 country: 'CO',
             },
             line_items: line_items,
