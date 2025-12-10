@@ -74,12 +74,12 @@ export default function CheckoutForm() {
                 nacional: 8000
             };
 
-            let cost = baseRates[shippingZone as keyof typeof baseRates] || baseRates.nacional;
+            let cost = baseRates[shippingZone as keyof typeof baseRates] ?? baseRates.nacional;
 
             // If weight exceeds 3 kg, add incremental cost
             if (totalWeight > 3) {
                 const extraWeight = totalWeight - 3;
-                const extraCost = Math.ceil(extraWeight) * (additionalRates[shippingZone as keyof typeof additionalRates] || additionalRates.nacional);
+                const extraCost = Math.ceil(extraWeight) * (additionalRates[shippingZone as keyof typeof additionalRates] ?? additionalRates.nacional);
                 cost += extraCost;
                 setShippingMessage(`Peso estimado: ${totalWeight.toFixed(1)} kg. Costo puede variar según peso volumétrico.`);
             }

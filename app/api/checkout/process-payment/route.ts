@@ -61,6 +61,14 @@ export async function POST(request: Request) {
                 {
                     key: 'numero_documento',
                     value: customer.documentId
+                },
+                {
+                    key: '_numero_documento', // Para compatibilidad con el snippet PHP
+                    value: customer.documentId
+                },
+                {
+                    key: '_tipo_documento', // Para compatibilidad con el snippet PHP
+                    value: 'cedula' // Valor por defecto
                 }
             ],
             shipping_lines: [
