@@ -6,8 +6,7 @@
  */
 
 // 1. Intercept the request to populate the Cart
-// Priority 5 ensures we run BEFORE WooCommerce checks for empty cart (Priority 10)
-add_action('template_redirect', 'saprix_handle_cart_handover', 5);
+add_action('template_redirect', 'saprix_handle_cart_handover');
 
 function saprix_handle_cart_handover()
 {
@@ -28,33 +27,21 @@ function saprix_handle_cart_handover()
     if (isset($_GET['items'])) {
         $items = explode(',', sanitize_text_field($_GET['items']));
 
-        foreach ($items as $itemStr) {
-            $parts = explode(':', $itemStr);
-            if (count($parts) === 2) {
-                $product_id = intval($parts[0]);
-                $quantity = intval($parts[1]);
+        foreach ($items as $item) {
+            $parts = explode(':', $item);
+            $product_id = intval($parts[0]);
+            $quantity = isset($parts[1]) ? intval($parts[1]) : 1;
 
-                if ($product_id > 0 && $quantity > 0) {
-                    // Verificación robusta: ¿Es producto simple o variación?
-                    $product = wc_get_product($product_id);
-
-                    if ($product) {
-                        if ($product->is_type('variation')) {
-                            // Es una variación: Necesitamos el ID del padre
-                            $parentId = $product->get_parent_id();
-                            WC()->cart->add_to_cart($parentId, $quantity, $product_id);
-                        } else {
-                            // Es un producto simple
-                            WC()->cart->add_to_cart($product_id, $quantity);
-                        }
-                    }
-                }
+            if ($product_id > 0) {
+                // Add to cart (Product ID, Qty)
+                // WooCommerce automatically handles variations when you pass the variation ID
+                WC()->cart->add_to_cart($product_id, $quantity);
             }
         }
-
-        // Note: We don't redirect here, we let the page continue to load the Checkout
-        // The query params remain in the URL so step 2 can read them.
     }
+
+    // Note: We don't redirect here, we let the page continue to load the Checkout
+    // The query params remain in the URL so step 2 can read them.
 }
 
 // 2. Pre-fill Checkout Fields from URL parameters
@@ -89,12 +76,14 @@ function saprix_prefill_checkout_fields($value, $input)
         if (isset($_GET['documentId']))
             return sanitize_text_field($_GET['documentId']);
     }
+
+    return $value;
 }
 
 
 // 4. Lógica de costo de envío personalizado (Peso por pares)
-// Fórmula: Base + (Incremento * floor(Cantidad / 2))
-// Ejemplo Nacional: 25.000 + (5.000 * floor(6/2)) = 25.000 + 15.000 = 40.000
+// Fórmula: Base + (Incremento * floor((Cantidad - 1) / 2))
+// Ejemplo Nacional: 25.000 + (5.000 * floor((6-1)/2)) = 25.000 + 10.000 = 35.000
 add_filter('woocommerce_package_rates', 'saprix_custom_shipping_cost', 10, 2);
 
 function saprix_custom_shipping_cost($rates, $package)
@@ -122,9 +111,6 @@ function saprix_custom_shipping_cost($rates, $package)
 
             // Aplicar costo
             $rates[$rate_key]->cost = $new_cost;
-
-            // Asegurar que los impuestos se recalculen si los hay (aunque normalmente no hay IVA en envío)
-            // $rates[$rate_key]->taxes = ...; 
         }
 
         // Lógica para ALREDEDORES (Si quieres que aplique igual)
