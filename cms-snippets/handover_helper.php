@@ -87,6 +87,7 @@ function saprix_prefill_checkout_fields($value, $input)
         if (isset($_GET['documentId']))
             return sanitize_text_field($_GET['documentId']);
     }
+}
 
 
 // 4. Lógica de costo de envío personalizado (Peso por pares)
