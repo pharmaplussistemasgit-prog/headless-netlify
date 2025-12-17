@@ -538,7 +538,12 @@ export default function CheckoutForm() {
                                     </div>
 
                                     <div className="flex justify-between items-start text-sm pt-2">
-                                        <span className="text-gray-600 uppercase font-medium">Envío</span>
+                                        <span className="text-gray-600 uppercase font-medium">
+                                            Envío {shippingZone === 'bogota' ? ': Bogotá D.C.' :
+                                                shippingZone === 'cercanos' ? ': Alrededores a Bogotá' :
+                                                    shippingZone === 'nacional' ? ': Nacional' :
+                                                        shippingZone === 'recoger' ? ': Recoger en Tienda' : ''}
+                                        </span>
                                         <div className="text-right">
                                             {shippingMessage === "Envío Gratis" ? (
                                                 <span className="font-bold text-green-700 uppercase">Gratis</span>
@@ -1003,7 +1008,12 @@ export default function CheckoutForm() {
                                     <span className="font-bold text-black">${cartTotal.toLocaleString('es-CO', { maximumFractionDigits: 0 })}</span>
                                 </div>
                                 <div className="flex justify-between items-start text-sm">
-                                    <span className="text-gray-600 uppercase font-medium">Envío</span>
+                                    <span className="text-gray-600 uppercase font-medium">
+                                        Envío {shippingZone === 'bogota' ? ': Bogotá D.C.' :
+                                            shippingZone === 'cercanos' ? ': Alrededores a Bogotá' :
+                                                shippingZone === 'nacional' ? ': Nacional' :
+                                                    shippingZone === 'recoger' ? ': Recoger en Tienda' : ''}
+                                    </span>
                                     <div className="text-right">
                                         {shippingMessage === "Envío Gratis" ? (
                                             <span className="font-bold text-green-700 uppercase">Gratis</span>
