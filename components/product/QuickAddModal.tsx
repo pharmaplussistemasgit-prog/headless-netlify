@@ -234,18 +234,32 @@ export default function QuickAddModal({
                                 <div className="flex items-center border border-gray-300 w-fit">
                                     <button
                                         onClick={() => setQuantity(Math.max(1, quantity - 1))}
-                                        className="w-9 h-9 flex items-center justify-center hover:bg-gray-100 transition-colors text-lg"
+                                        disabled={quantity <= 1}
+                                        className={`w-9 h-9 flex items-center justify-center transition-colors text-lg ${quantity <= 1 ? 'opacity-50 cursor-not-allowed' : 'hover:bg-gray-100'
+                                            }`}
                                     >
                                         −
                                     </button>
                                     <span className="w-10 text-center font-bold text-sm">{quantity}</span>
                                     <button
-                                        onClick={() => setQuantity(quantity + 1)}
-                                        className="w-9 h-9 flex items-center justify-center hover:bg-gray-100 transition-colors text-lg"
+                                        onClick={() => {
+                                            const maxStock = variationStock || 999;
+                                            setQuantity(Math.min(maxStock, quantity + 1));
+                                        }}
+                                        disabled={variationStock !== undefined && quantity >= variationStock}
+                                        className={`w-9 h-9 flex items-center justify-center transition-colors text-lg ${(variationStock !== undefined && quantity >= variationStock)
+                                                ? 'opacity-50 cursor-not-allowed'
+                                                : 'hover:bg-gray-100'
+                                            }`}
                                     >
                                         +
                                     </button>
                                 </div>
+                                {variationStock !== undefined && quantity >= variationStock && (
+                                    <p className="text-xs text-orange-600 font-medium mt-2">
+                                        Stock máximo alcanzado
+                                    </p>
+                                )}
                             </div>
                         </div>
 
