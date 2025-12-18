@@ -104,9 +104,9 @@ export default function QuickAddModal({
                 {/* Close Button */}
                 <button
                     onClick={onClose}
-                    className="absolute top-4 right-4 z-10 p-2 hover:bg-gray-100 rounded-full transition-colors"
+                    className="absolute top-4 right-4 z-10 p-2 bg-blue-600 hover:bg-blue-700 rounded-full transition-colors shadow-lg"
                 >
-                    <X className="w-5 h-5" />
+                    <X className="w-5 h-5 text-white" />
                 </button>
 
                 <div className="grid grid-cols-1 md:grid-cols-[1.2fr_1fr] gap-0 overflow-y-auto">
