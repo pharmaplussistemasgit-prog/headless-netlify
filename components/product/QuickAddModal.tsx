@@ -148,7 +148,7 @@ export default function QuickAddModal({
                     </div>
 
                     {/* Right Side - Product Details */}
-                    <div className="p-8 flex flex-col justify-between">
+                    <div className="p-4 md:p-8 flex flex-col justify-between">
                         <div>
                             {/* Product Info */}
                             <div className="mb-4">
