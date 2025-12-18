@@ -8,6 +8,7 @@ import { toast } from 'sonner';
 import { X, Plus, Minus, ShieldCheck, ShoppingBag, ArrowRight, Truck, CreditCard } from 'lucide-react';
 import Link from 'next/link';
 import Image from 'next/image';
+import ProductCard from '@/components/product/ProductCard';
 
 export default function CheckoutForm() {
     const { items, cartTotal, removeItem, updateQuantity } = useCart();
@@ -445,27 +446,16 @@ export default function CheckoutForm() {
                                         </h3>
                                         <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
                                             {recommendedProducts.map((product) => (
-                                                <Link
+                                                <ProductCard
                                                     key={product.id}
-                                                    href={`/producto/${product.slug}`}
-                                                    target="_blank"
-                                                    className="group block"
-                                                >
-                                                    <div className="aspect-square bg-gray-50 relative mb-3 overflow-hidden">
-                                                        <Image
-                                                            src={product.image}
-                                                            alt={product.name}
-                                                            fill
-                                                            className="object-cover mix-blend-multiply group-hover:scale-105 transition-transform duration-500"
-                                                        />
-                                                    </div>
-                                                    <h4 className="text-xs font-bold text-black uppercase truncate mb-1">
-                                                        {product.name}
-                                                    </h4>
-                                                    <p className="text-xs text-gray-600">
-                                                        ${product.price.toLocaleString('es-CO', { maximumFractionDigits: 0 })}
-                                                    </p>
-                                                </Link>
+                                                    id={product.id}
+                                                    name={product.name}
+                                                    price={product.price.toString()}
+                                                    imageUrl={product.image}
+                                                    slug={product.slug}
+                                                    images={product.images || [product.image]}
+                                                    type={product.type || 'simple'}
+                                                />
                                             ))}
                                         </div>
                                     </div>
