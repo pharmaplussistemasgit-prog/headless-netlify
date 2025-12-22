@@ -7,8 +7,12 @@ export const revalidate = 0;
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     let baseUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://saprix.com.co';
 
-    // Aggressively sanitize baseUrl: FIRST trim & remove query params, THEN remove trailing slashes
-    baseUrl = baseUrl.trim().split('?')[0].replace(/\/+$/, '');
+    // Aggressively sanitize baseUrl: use new URL().origin to ensure a clean base without slashes or query params
+    try {
+        baseUrl = new URL(baseUrl).origin;
+    } catch (e) {
+        baseUrl = 'https://saprix.com.co';
+    }
 
     // Helper to join paths safely without double slashes
     const joinPath = (path: string) => {
