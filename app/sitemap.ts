@@ -32,12 +32,8 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     try {
         const { products } = await getProducts({ perPage: 100 });
         productRoutes = products.map((product) => ({
-            url: `${baseUrl}/[slug]?slug=${product.slug}`, // Based on app structure [slug]
-            // In a real scenario, we'd use the mapping or the actual route if different
-            // If the app uses /productos/[slug], adjust accordingly.
-            // Based on app structure, products seem to be at /[slug]
             url: `${baseUrl}/${product.slug}`,
-            lastModified: new Date(product.date_modified || product.date_created),
+            lastModified: new Date(),
             changeFrequency: 'weekly' as const,
             priority: 0.7,
         }));
