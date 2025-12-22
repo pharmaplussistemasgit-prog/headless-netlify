@@ -1,11 +1,20 @@
 import { MetadataRoute } from 'next';
 import { getProducts, getAllProductCategories } from '@/lib/woocommerce';
 
+export const dynamic = 'force-dynamic';
+export const revalidate = 0;
+
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     let baseUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://saprix.com.co';
 
-    // Sanitize baseUrl: Remove ALL trailing slashes and any query parameters
+    // Aggressively sanitize baseUrl: Remove multiple trailing slashes and ALL query parameters
     baseUrl = baseUrl.replace(/\/+$/, '').split('?')[0].trim();
+
+    // Helper to join paths safely without double slashes
+    const joinPath = (path: string) => {
+        const cleanPath = path.startsWith('/') ? path : `/${path}`;
+        return `${baseUrl}${cleanPath}`;
+    };
 
     // 1. Static Routes
     const staticRoutes = [
@@ -22,7 +31,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
         '/cookies',
         '/wishlist',
     ].map((route) => ({
-        url: `${baseUrl}${route}`,
+        url: joinPath(route),
         lastModified: new Date(),
         changeFrequency: 'daily' as const,
         priority: route === '' ? 1 : 0.8,
@@ -35,7 +44,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     try {
         const { products } = await getProducts({ perPage: 100 });
         productRoutes = products.map((product) => ({
-            url: `${baseUrl}/${product.slug}`,
+            url: joinPath(product.slug),
             lastModified: new Date(),
             changeFrequency: 'weekly' as const,
             priority: 0.7,
@@ -49,7 +58,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     try {
         const categories = await getAllProductCategories();
         categoryRoutes = categories.map((category) => ({
-            url: `${baseUrl}/tienda?category=${category.slug}`,
+            url: joinPath(`tienda?category=${category.slug}`),
             lastModified: new Date(),
             changeFrequency: 'weekly' as const,
             priority: 0.6,
