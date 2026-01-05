@@ -60,11 +60,20 @@ const heroSlides: HeroSlide[] = [
 
 export default async function HomePage() {
   // Fetch featured products (on sale or featured)
-  const featuredResult = await getProducts({
+  let featuredResult = await getProducts({
     perPage: 12,
     featured: true,
     orderby: 'popularity'
   });
+
+  // Fallback: If no featured products found, show most popular items
+  if (featuredResult.products.length === 0) {
+    console.warn('No featured products found, falling back to popular products');
+    featuredResult = await getProducts({
+      perPage: 12,
+      orderby: 'popularity'
+    });
+  }
 
   // Fetch specific flash deals products by SKU (only these 2)
   let flashDealsProducts: any[] = [];

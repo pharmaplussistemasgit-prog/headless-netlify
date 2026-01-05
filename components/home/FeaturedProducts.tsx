@@ -2,9 +2,11 @@
 
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
-import Image from 'next/image';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 import { Product } from '@/types/woocommerce';
+import ProductCard from '@/components/product/ProductCard';
+import { mapWooProduct } from '@/lib/mappers';
+import { WooProduct } from '@/types/product';
 
 interface FeaturedProductsProps {
     title?: string;
@@ -16,7 +18,19 @@ export default function FeaturedProducts({
     products
 }: FeaturedProductsProps) {
     const [currentIndex, setCurrentIndex] = useState(0);
-    const itemsPerView = 4;
+    const [itemsPerView, setItemsPerView] = useState(4);
+
+    useEffect(() => {
+        const handleResize = () => {
+            if (window.innerWidth < 640) setItemsPerView(1);
+            else if (window.innerWidth < 1024) setItemsPerView(2);
+            else setItemsPerView(4);
+        };
+        // Initial set
+        handleResize();
+        window.addEventListener('resize', handleResize);
+        return () => window.removeEventListener('resize', handleResize);
+    }, []);
 
     const scroll = (direction: 'left' | 'right') => {
         if (direction === 'right') {
@@ -31,15 +45,6 @@ export default function FeaturedProducts({
     };
 
     const visibleProducts = products.slice(currentIndex, currentIndex + itemsPerView);
-
-    // Calculate discount percentage
-    const getDiscountPercentage = (product: Product) => {
-        if (product.sale_price && product.regular_price) {
-            const discount = ((parseFloat(product.regular_price) - parseFloat(product.sale_price)) / parseFloat(product.regular_price)) * 100;
-            return Math.round(discount);
-        }
-        return 0;
-    };
 
     return (
         <div className="w-full bg-[var(--color-bg-light)] py-4">
@@ -65,7 +70,7 @@ export default function FeaturedProducts({
                         {/* Left Arrow */}
                         <button
                             onClick={() => scroll('left')}
-                            className="absolute left-0 top-1/2 -translate-y-1/2 -translate-x-4 z-10 w-12 h-12 bg-slate-50 hover:bg-slate-100 text-gray-600 rounded-full flex items-center justify-center transition-all hover:scale-110"
+                            className="absolute left-0 top-1/2 -translate-y-1/2 -translate-x-4 z-10 w-12 h-12 bg-slate-50 hover:bg-slate-100 text-gray-600 rounded-full flex items-center justify-center transition-all hover:scale-110 shadow-md"
                             aria-label="Anterior"
                         >
                             <ChevronLeft className="w-6 h-6" />
@@ -74,66 +79,11 @@ export default function FeaturedProducts({
                         {/* Products Grid */}
                         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
                             {visibleProducts.map((product) => {
-                                const discount = getDiscountPercentage(product);
-                                const hasPromotion = product.meta_data?.find(m => m.key === '_promotion_label')?.value as string | undefined;
-
+                                const mappedProduct = mapWooProduct(product as unknown as WooProduct);
                                 return (
-                                    <Link
-                                        key={product.id}
-                                        href={`/producto/${product.slug}`}
-                                        className="group relative bg-white overflow-hidden hover:shadow-lg transition-all duration-300"
-                                    >
-                                        {/* Discount Badge */}
-                                        {discount > 0 && (
-                                            <div className="absolute top-3 right-3 z-10 bg-yellow-400 text-gray-900 font-bold text-sm px-3 py-1 rounded-full">
-                                                {discount}%
-                                            </div>
-                                        )}
-
-                                        {/* Product Image */}
-                                        <div className="relative aspect-square bg-white p-4 flex items-center justify-center">
-                                            <Image
-                                                src={product.images[0]?.src || '/placeholder-image.png'}
-                                                alt={product.name}
-                                                width={300}
-                                                height={300}
-                                                className="object-contain w-full h-full group-hover:scale-105 transition-transform duration-300"
-                                            />
-                                        </div>
-
-                                        {/* Product Info */}
-                                        <div className="p-4 space-y-2">
-                                            {/* Product Name */}
-                                            <h3 className="text-sm font-medium text-gray-800 line-clamp-2 group-hover:text-[var(--color-pharma-blue)] transition-colors">
-                                                {product.name}
-                                            </h3>
-
-                                            {/* Price */}
-                                            <div className="flex items-baseline gap-2">
-                                                {product.sale_price && product.regular_price ? (
-                                                    <>
-                                                        <span className="text-lg font-bold text-[var(--color-pharma-blue)]">
-                                                            ${parseFloat(product.sale_price).toLocaleString('es-CO')}
-                                                        </span>
-                                                        <span className="text-sm text-gray-400 line-through">
-                                                            ${parseFloat(product.regular_price).toLocaleString('es-CO')}
-                                                        </span>
-                                                    </>
-                                                ) : product.price ? (
-                                                    <span className="text-lg font-bold text-[var(--color-pharma-blue)]">
-                                                        ${parseFloat(product.price).toLocaleString('es-CO')}
-                                                    </span>
-                                                ) : null}
-                                            </div>
-
-                                            {/* Promotion Label */}
-                                            {hasPromotion && (
-                                                <div className="bg-yellow-100 text-gray-800 text-xs font-semibold px-3 py-1.5 rounded-md inline-block">
-                                                    {String(hasPromotion)}
-                                                </div>
-                                            )}
-                                        </div>
-                                    </Link>
+                                    <div key={product.id} className="h-full">
+                                        <ProductCard product={mappedProduct} />
+                                    </div>
                                 );
                             })}
                         </div>
@@ -141,7 +91,7 @@ export default function FeaturedProducts({
                         {/* Right Arrow */}
                         <button
                             onClick={() => scroll('right')}
-                            className="absolute right-0 top-1/2 -translate-y-1/2 translate-x-4 z-10 w-12 h-12 bg-slate-50 hover:bg-slate-100 text-gray-600 rounded-full flex items-center justify-center transition-all hover:scale-110"
+                            className="absolute right-0 top-1/2 -translate-y-1/2 translate-x-4 z-10 w-12 h-12 bg-slate-50 hover:bg-slate-100 text-gray-600 rounded-full flex items-center justify-center transition-all hover:scale-110 shadow-md"
                             aria-label="Siguiente"
                         >
                             <ChevronRight className="w-6 h-6" />
