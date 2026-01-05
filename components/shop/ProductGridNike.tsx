@@ -5,6 +5,8 @@ import { getCategoryBySlug } from '@/lib/category-utils';
 import { AddToCartButton } from '@/components/shop/AddToCartButton';
 import ProductCard from '@/components/product/ProductCard';
 import { ensureHttps } from '@/lib/utils';
+import { mapWooProduct } from '@/lib/mappers';
+import { WooProduct } from '@/types/product';
 
 export type SortValue = 'newest' | 'price-asc' | 'price-desc' | 'popular';
 
@@ -108,36 +110,7 @@ export async function ProductGridNike({ searchParams }: ProductGridNikeProps) {
             {/* Products Grid */}
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-x-6 gap-y-12">
                 {products.map((product) => {
-                    const price = parseFloat(product.price || '0');
-                    const salePrice = product.sale_price ? parseFloat(product.sale_price) : null;
-                    const regularPrice = product.regular_price ? parseFloat(product.regular_price) : price;
-                    const isOnSale = salePrice !== null && salePrice < regularPrice;
-
-                    const discountPercentage = isOnSale
-                        ? Math.round(((regularPrice - (salePrice || 0)) / regularPrice) * 100)
-                        : null;
-
-                    const mappedProduct = {
-                        id: product.id,
-                        name: product.name,
-                        slug: product.slug,
-                        sku: product.sku || null,
-                        price: salePrice || price,
-                        regularPrice: regularPrice,
-                        isOnSale: isOnSale,
-                        stock: product.stock_quantity ?? null,
-                        isInStock: product.stock_status === 'instock',
-                        showExactStock: (product.stock_quantity || 0) < 10,
-                        images: product.images?.map(img => img.src) || [],
-                        categories: product.categories || [],
-                        shortDescription: product.short_description || '',
-                        brand: product.attributes?.find(a => a.name.toLowerCase() === 'marca')?.options[0] || null,
-                        invima: null,
-                        productType: product.type,
-                        requiresRx: false,
-                        isRefrigerated: false,
-                        discountPercentage: discountPercentage
-                    };
+                    const mappedProduct = mapWooProduct(product as unknown as WooProduct);
 
                     return (
                         <div key={product.id} className="group">
