@@ -1,20 +1,69 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import ProductCard from '@/components/product/ProductCard';
 import { FiltersSidebar } from '@/components/shop/FiltersSidebar';
-import { SlidersHorizontal, X, ArrowRight } from 'lucide-react';
+import {
+    SlidersHorizontal,
+    X,
+    ArrowRight,
+    Filter,
+    ChevronDown,
+    ChevronLeft,
+    ChevronRight,
+    Heart,
+    Sparkles,
+    Baby,
+    Apple,
+    Dumbbell,
+    Sun,
+    Cross,
+    BriefcaseMedical,
+    SprayCan,
+    Smile,
+    Zap,
+    Flame
+} from "lucide-react";
 import { Category, Product, Tag, AttributeWithTerms } from '@/types/woocommerce';
+import { ProductAttribute } from '@/types/woocommerce';
+
+// Helper to get category styles
+const getCategoryStyle = (slug: string) => {
+    switch (slug.toLowerCase()) {
+        case 'salud-y-medicamentos':
+        case 'medicamentos':
+            return { icon: Heart, color: 'text-red-500', bg: 'bg-red-100' };
+        case 'dermocosmetico':
+        case 'belleza':
+            return { icon: Sparkles, color: 'text-purple-500', bg: 'bg-purple-100' };
+        case 'cuidado-personal':
+            return { icon: SprayCan, color: 'text-blue-500', bg: 'bg-blue-100' };
+        case 'bebe':
+        case 'maternidad':
+            return { icon: Baby, color: 'text-pink-500', bg: 'bg-pink-100' };
+        case 'nutricion':
+        case 'alimentos':
+            return { icon: Apple, color: 'text-green-500', bg: 'bg-green-100' };
+        case 'salud-visual':
+            return { icon: Sun, color: 'text-orange-500', bg: 'bg-orange-100' };
+        case 'bienestar-sexual':
+            return { icon: Flame, color: 'text-rose-500', bg: 'bg-rose-100' };
+        default:
+            return { icon: Cross, color: 'text-[var(--color-primary-blue)]', bg: 'bg-blue-50' };
+    }
+};
 
 interface ShopClientProps {
     initialProducts: Product[];
     categories: Category[];
     tags: Tag[];
     attributes: AttributeWithTerms[];
+    totalPages: number;
+    currentPage: number;
 }
 
-export function ShopClient({ initialProducts, categories, tags, attributes }: ShopClientProps) {
+export function ShopClient({ initialProducts, categories, tags, attributes, totalPages, currentPage }: ShopClientProps) {
     const router = useRouter();
     const searchParams = useSearchParams();
 
@@ -55,6 +104,50 @@ export function ShopClient({ initialProducts, categories, tags, attributes }: Sh
         };
     }, [isMobileFiltersOpen, searchParams]);
 
+    // Attributes robust mapping: If no global attributes are passed (id > 0),
+    // we extract them from the products themselves (local attributes id = 0 or missing globals)
+    const finalAttributes = useMemo(() => {
+        if (attributes && attributes.length > 0) return attributes;
+
+        // Fallback: Extract from products
+        const attrMap = new Map<string, { id: number; name: string; slug: string; options: Set<string> }>();
+
+        initialProducts.forEach(p => {
+            p.attributes.forEach(a => {
+                const key = a.name.toLowerCase();
+                if (!attrMap.has(key)) {
+                    attrMap.set(key, {
+                        id: a.id,
+                        name: a.name,
+                        slug: a.name.toLowerCase().replace(/\s+/g, '-'),
+                        options: new Set()
+                    });
+                }
+                a.options.forEach(opt => attrMap.get(key)?.options.add(opt));
+            });
+        });
+
+        // Convert locally extracted map to AttributeWithTerms[]
+        const extracted: AttributeWithTerms[] = [];
+        attrMap.forEach((val) => {
+            // Only include robust attributes like Marca/Laboratorio for now to avoid noise
+            if (['marca', 'laboratorio', 'color', 'talla'].includes(val.name.toLowerCase())) {
+                extracted.push({
+                    attribute: { id: val.id || 0, name: val.name, slug: val.slug, options: [] },
+                    terms: Array.from(val.options).map((opt, idx) => ({
+                        id: idx, // Fake ID for local term
+                        name: opt,
+                        slug: opt.toLowerCase().replace(/\s+/g, '-'),
+                        count: 0 // We could compute count but 0 is fine for now
+                    }))
+                });
+            }
+        });
+
+        // If "Marca" or "Laboratorio" found, priorize them
+        return extracted;
+    }, [attributes, initialProducts]);
+
     return (
         <div className="min-h-screen bg-white font-sans text-gray-900">
             {/* Header / Top Bar */}
@@ -88,14 +181,14 @@ export function ShopClient({ initialProducts, categories, tags, attributes }: Sh
                 </div>
             </div>
 
-            <div className="max-w-[1920px] mx-auto px-4 sm:px-6 lg:px-8 py-8 flex items-start gap-8">
+            <div className="max-w-[1920px] mx-auto px-4 sm:px-6 lg:px-[100px] py-8 flex items-start gap-8">
 
-                {/* DESKTOP SIDEBAR - PERMANENTLY VISIBLE */}
-                <div className="hidden md:block w-72 flex-shrink-0 sticky top-24">
+                {/* DESKTOP SIDEBAR - STANDARD STICKY */}
+                <div className="hidden md:block w-64 flex-shrink-0 sticky top-24 h-fit">
                     <FiltersSidebar
                         categories={categories}
                         tags={tags}
-                        attributes={attributes}
+                        attributes={finalAttributes}
                         selected={selectedFilters}
                         currentParams={currentParams}
                     />
@@ -109,13 +202,13 @@ export function ShopClient({ initialProducts, categories, tags, attributes }: Sh
                             <p className="text-gray-500 mb-6">No encontramos productos con estos filtros.</p>
                             <button
                                 onClick={() => router.push('/tienda')}
-                                className="px-6 py-2 bg-[var(--color-primary-blue)] text-white font-medium rounded-full hover:bg-[var(--color-dark-blue)] transition-colors shadow-md"
+                                className="px-6 py-2 bg-[var(--color-pharma-blue)] text-white font-medium rounded-full hover:bg-[var(--color-blue-classic)] transition-colors shadow-md"
                             >
                                 Ver todos los productos
                             </button>
                         </div>
                     ) : (
-                        <div className="grid grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-4">
+                        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
                             {initialProducts.map(product => (
                                 <ProductCard
                                     key={product.id}
@@ -142,6 +235,42 @@ export function ShopClient({ initialProducts, categories, tags, attributes }: Sh
                                     }}
                                 />
                             ))}
+                        </div>
+                    )}
+
+                    {/* Pagination Controls */}
+                    {totalPages > 1 && (
+                        <div className="mt-12 flex items-center justify-center gap-6">
+                            {/* Prev Button */}
+                            <button
+                                disabled={currentPage <= 1}
+                                onClick={() => router.push(`?${new URLSearchParams({ ...currentParams, page: (currentPage - 1).toString() }).toString()}`)}
+                                className={`px-6 py-2.5 rounded-full font-extrabold transition-all flex items-center gap-2 shadow-sm ${currentPage <= 1
+                                    ? 'bg-gray-50 border-2 border-gray-100 text-gray-300 cursor-not-allowed'
+                                    : 'bg-white border-2 border-[var(--color-pharma-blue)] text-[var(--color-pharma-blue)] hover:bg-blue-50 hover:shadow-md active:scale-95'
+                                    }`}
+                            >
+                                <ChevronLeft className="w-5 h-5" />
+                                Anterior
+                            </button>
+
+                            {/* Page Info */}
+                            <span className="text-[var(--color-pharma-blue)] font-bold px-6 py-2.5 bg-blue-50/50 rounded-full">
+                                Página {currentPage} de {totalPages}
+                            </span>
+
+                            {/* Next Button */}
+                            <button
+                                disabled={currentPage >= totalPages}
+                                onClick={() => router.push(`?${new URLSearchParams({ ...currentParams, page: (currentPage + 1).toString() }).toString()}`)}
+                                className={`px-6 py-2.5 rounded-full font-extrabold transition-all flex items-center gap-2 shadow-sm ${currentPage >= totalPages
+                                    ? 'bg-gray-50 border-2 border-gray-100 text-gray-300 cursor-not-allowed'
+                                    : 'bg-[var(--color-pharma-blue)] border-2 border-[var(--color-pharma-blue)] text-white hover:bg-[var(--color-blue-classic)] hover:border-[var(--color-blue-classic)] hover:shadow-md active:scale-95'
+                                    }`}
+                            >
+                                Siguiente
+                                <ChevronRight className="w-5 h-5" />
+                            </button>
                         </div>
                     )}
                 </main>
@@ -171,7 +300,7 @@ export function ShopClient({ initialProducts, categories, tags, attributes }: Sh
                             <FiltersSidebar
                                 categories={categories}
                                 tags={tags}
-                                attributes={attributes}
+                                attributes={finalAttributes}
                                 selected={selectedFilters}
                                 currentParams={currentParams}
                             />

@@ -78,8 +78,8 @@ export default function CheckoutForm() {
         setIsLoading(true);
         try {
             // Handover URL (Legacy/Backend)
-            // Ideally this should be updated to a non-branded URL if possible, but keeping it functional.
-            const baseUrl = "https://pagos.saprix.com.co/finalizar-compra/";
+            // Handover URL (Legacy/Backend)
+            const baseUrl = (process.env.NEXT_PUBLIC_WORDPRESS_URL || "https://tienda.pharmaplus.com.co").replace(/\/$/, "") + "/finalizar-compra/";
 
             const itemsString = items.map(item => {
                 const idToUse = item.variationId || item.id;

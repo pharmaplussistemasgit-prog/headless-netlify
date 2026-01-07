@@ -1,7 +1,11 @@
 import HeroSection, { HeroSlide } from "@/components/home/HeroSection";
 import CategoryIconsSection from "@/components/home/CategoryIconsSection";
 import FeaturedProducts from "@/components/home/FeaturedProducts";
+import ColdChainSection from "@/components/home/ColdChainSection";
 import FlashDeals from "@/components/home/FlashDeals";
+import RecommendedSection from "@/components/home/RecommendedSection";
+import BeautySection from "@/components/home/BeautySection";
+import HealthSection from "@/components/home/HealthSection";
 import { getProducts } from "@/lib/woocommerce";
 
 // Professional Hero Slides with local images
@@ -59,14 +63,13 @@ const heroSlides: HeroSlide[] = [
 ];
 
 export default async function HomePage() {
-  // Fetch featured products (on sale or featured)
+  // 1. Fetch Featured Products
   let featuredResult = await getProducts({
     perPage: 12,
     featured: true,
     orderby: 'popularity'
   });
 
-  // Fallback: If no featured products found, show most popular items
   if (featuredResult.products.length === 0) {
     console.warn('No featured products found, falling back to popular products');
     featuredResult = await getProducts({
@@ -75,41 +78,70 @@ export default async function HomePage() {
     });
   }
 
-  // Fetch specific flash deals products by SKU (only these 2)
+  // 2. Fetch Flash Deals (Specific SKUs or Fallback)
   let flashDealsProducts: any[] = [];
-
   try {
     const flashDealsResult = await getProducts({
       perPage: 10,
       sku: '3294,76205',
     });
     flashDealsProducts = flashDealsResult.products;
-
-    // Fallback: If SKUs not found, get any 2 products to show the section
     if (flashDealsProducts.length === 0) {
-      console.warn('Flash deals SKUs not found, using fallback products');
       const tempResult = await getProducts({ perPage: 2, orderby: 'date', order: 'desc' });
       flashDealsProducts = tempResult.products;
     }
   } catch (error) {
     console.error('Error fetching flash deals:', error);
-    // Fallback to any products
     const tempResult = await getProducts({ perPage: 2 });
     flashDealsProducts = tempResult.products;
   }
 
+  // 3. Fetch Cold Chain Products
+  const coldChainResult = await getProducts({
+    search: 'insulina',
+    perPage: 8,
+    orderby: 'popularity'
+  });
+
+  // 4. Fetch Beauty Products
+  const beautyResult = await getProducts({
+    search: 'shampoo', // Fallback search term for beauty/personal care
+    perPage: 10,
+    orderby: 'popularity'
+  });
+
+  // 5. Fetch Health Products
+  // Using broad terms to get medicines like Electrolit, Pedialyte etc.
+  // Fallback to 'farmacia' or 'medicamento'
+  let healthResult = await getProducts({
+    category: '20', // Try explicit category ID if known, otherwise search
+    perPage: 10,
+    orderby: 'popularity'
+  });
+
+  if (healthResult.products.length === 0) {
+    healthResult = await getProducts({ search: 'farmacia', perPage: 10 });
+  }
+
+  if (healthResult.products.length === 0) {
+    healthResult = await getProducts({ search: 'medicamento', perPage: 10 });
+  }
+
   return (
     <div className="w-full bg-[var(--color-bg-light)]">
-      {/* Hero Section - Slider + Top Features */}
+      {/* Hero Section */}
       <HeroSection
         slides={heroSlides}
         featuredProds={featuredResult.products.slice(0, 2)}
       />
 
-      {/* Category Icons Section */}
+      {/* Category Icons */}
       <CategoryIconsSection />
 
-      {/* Featured Products Section */}
+      {/* Recommended Section (New, using featured data) */}
+      <RecommendedSection products={featuredResult.products} />
+
+      {/* Featured Products Grid */}
       {featuredResult.products.length > 0 && (
         <FeaturedProducts
           title="¡Hola ! Estos productos te pueden interesar"
@@ -117,13 +149,22 @@ export default async function HomePage() {
         />
       )}
 
-      {/* Flash Deals Section - Mundo Ofertas */}
+      {/* Cold Chain Section */}
+      <ColdChainSection products={coldChainResult.products} />
+
+      {/* Flash Deals Section */}
       {flashDealsProducts.length > 0 && (
         <FlashDeals
           title="Mundo Ofertas"
           products={flashDealsProducts}
         />
       )}
+
+      {/* Beauty Section */}
+      <BeautySection products={beautyResult.products} />
+
+      {/* Health Section (New) */}
+      <HealthSection products={healthResult.products} />
     </div>
   );
 }

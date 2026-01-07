@@ -329,6 +329,8 @@ export async function getProducts(params: {
   search?: string;
   sku?: string;
   featured?: boolean;
+  minPrice?: string;
+  maxPrice?: string;
 } = {}): Promise<{ products: Product[]; total: number; totalPages: number }> {
   try {
     const {
@@ -341,6 +343,8 @@ export async function getProducts(params: {
       search,
       sku,
       featured,
+      minPrice,
+      maxPrice,
     } = params;
 
     const queryParams: any = {
@@ -369,6 +373,14 @@ export async function getProducts(params: {
 
     if (featured !== undefined) {
       queryParams.featured = featured;
+    }
+
+    if (minPrice) {
+      queryParams.min_price = minPrice;
+    }
+
+    if (maxPrice) {
+      queryParams.max_price = maxPrice;
     }
 
     const response = await getWooApi().get('products', queryParams);

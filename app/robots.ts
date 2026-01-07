@@ -5,13 +5,13 @@ export const revalidate = 0;
 
 
 export default function robots(): MetadataRoute.Robots {
-    let baseUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://saprix.com.co';
+    let baseUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://pharma-headless-1a.vercel.app';
 
     // Sanitize baseUrl: use new URL().origin to ensure a clean base without slashes or query params
     try {
         baseUrl = new URL(baseUrl).origin;
     } catch (e) {
-        baseUrl = 'https://saprix.com.co';
+        baseUrl = 'https://pharma-headless-1a.vercel.app';
     }
 
     return {

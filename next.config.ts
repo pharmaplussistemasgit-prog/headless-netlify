@@ -7,25 +7,13 @@ const nextConfig: NextConfig = {
     remotePatterns: [
       {
         protocol: "https",
-        hostname: "pagos.saprix.com.co",
+        hostname: "tienda.pharmaplus.com.co",
         port: "",
         pathname: "/wp-content/uploads/**",
       },
       {
         protocol: "http",
-        hostname: "pagos.saprix.com.co",
-        port: "",
-        pathname: "/wp-content/uploads/**",
-      },
-      {
-        protocol: "https",
-        hostname: "www.pagos.saprix.com.co",
-        port: "",
-        pathname: "/wp-content/uploads/**",
-      },
-      {
-        protocol: "http",
-        hostname: "www.pagos.saprix.com.co",
+        hostname: "tienda.pharmaplus.com.co",
         port: "",
         pathname: "/wp-content/uploads/**",
       },

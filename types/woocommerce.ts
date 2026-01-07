@@ -30,6 +30,7 @@ export interface Product {
   stock_status?: string;
   stock_quantity?: number;
   sku?: string;
+  status?: string;
 }
 
 export interface VariationAttribute {

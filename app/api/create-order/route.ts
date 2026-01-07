@@ -1,13 +1,8 @@
 import { NextResponse } from 'next/server';
 
-// TEMP: Hardcoded fallback for localhost development due to .env file corruption issues
-const LOCALHOST_URL = "https://pagos.saprix.com.co";
-const LOCALHOST_CK = "ck_88721898d82f29e0f8664d7e3316aa460340f587";
-const LOCALHOST_CS = "cs_37ebd5161dd1ed62e199570e702fb7d123454569";
-
-const WOO_URL = process.env.NEXT_PUBLIC_WORDPRESS_URL || LOCALHOST_URL;
-const CK = process.env.WOOCOMMERCE_CONSUMER_KEY || LOCALHOST_CK;
-const CS = process.env.WOOCOMMERCE_CONSUMER_SECRET || LOCALHOST_CS;
+const WOO_URL = process.env.NEXT_PUBLIC_WORDPRESS_URL;
+const CK = process.env.WOOCOMMERCE_CONSUMER_KEY;
+const CS = process.env.WOOCOMMERCE_CONSUMER_SECRET;
 
 export async function POST(request: Request) {
     try {

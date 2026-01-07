@@ -21,9 +21,20 @@ interface WooProduct {
 
 export async function GET(req: Request) {
     try {
-        const WORDPRESS_URL = "https://pagos.saprix.com.co";
-        const CONSUMER_KEY = "ck_88721898d82f29e0f8664d7e3316aa460340f587";
-        const CONSUMER_SECRET = "cs_37ebd5161dd1ed62e199570e702fb7d123454569";
+        const WORDPRESS_URL = process.env.WOOCOMMERCE_API_URL || process.env.NEXT_PUBLIC_WORDPRESS_URL;
+        const CONSUMER_KEY = process.env.WOOCOMMERCE_CONSUMER_KEY;
+        const CONSUMER_SECRET = process.env.WOOCOMMERCE_CONSUMER_SECRET;
+
+        if (!WORDPRESS_URL || !CONSUMER_KEY || !CONSUMER_SECRET) {
+            return NextResponse.json(
+                {
+                    success: false,
+                    error: "Configuration Error",
+                    message: "Missing WooCommerce API credentials in environment variables"
+                },
+                { status: 500 }
+            );
+        }
 
         // Fetch all products from WooCommerce
         let allProducts: WooProduct[] = [];

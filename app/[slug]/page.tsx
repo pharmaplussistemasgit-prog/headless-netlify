@@ -18,13 +18,13 @@ export async function generateMetadata(props: ProductPageProps) {
 
     if (!product) {
         return {
-            title: "Producto no encontrado - Saprix",
+            title: "Producto no encontrado - PharmaPlus",
         };
     }
 
     return {
-        title: `${product.name} - Saprix`,
-        description: product.short_description || product.description || `Compra ${product.name} en Saprix`,
+        title: `${product.name} - PharmaPlus`,
+        description: product.short_description || product.description || `Compra ${product.name} en PharmaPlus`,
     };
 }
 

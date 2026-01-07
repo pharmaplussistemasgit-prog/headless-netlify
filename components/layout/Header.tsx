@@ -4,7 +4,7 @@ import Link from 'next/link';
 import Image from 'next/image';
 import {
     Search, ShoppingCart, User, MapPin, ChevronDown,
-    Phone, Mail, Tag, Heart, Store, Pill, Menu, CreditCard
+    Phone, Mail, Tag, Heart, Store, Pill, Menu, CreditCard, Snowflake
 } from 'lucide-react';
 import { useState, useRef, useEffect } from 'react';
 import { CategoryTree } from '@/types/woocommerce';
@@ -383,6 +383,14 @@ export default function Header({ categories = [] }: HeaderProps) {
             <div className="bg-[var(--color-bg-light)] border-b border-gray-100 hidden md:block">
                 <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                     <div className="flex items-center justify-center py-2.5 gap-2">
+                        {/* Cold Chain Highlight */}
+                        <Link
+                            href="/categoria/cadena-de-frio"
+                            className="flex items-center gap-1.5 text-[13px] font-bold text-[#00AEEF] hover:text-[#0090C5] hover:scale-105 transition-all px-4 py-1 bg-[#00AEEF]/5 rounded-full border border-[#00AEEF]/20 mr-2"
+                        >
+                            <Snowflake className="w-4 h-4" />
+                            Cadena de Frío
+                        </Link>
                         {categories.slice(0, 7).map((cat) => (
                             <Link
                                 key={cat.id}

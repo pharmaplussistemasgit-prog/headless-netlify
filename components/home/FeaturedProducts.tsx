@@ -50,7 +50,7 @@ export default function FeaturedProducts({
         <div className="w-full bg-[var(--color-bg-light)] py-4">
             <div className="max-w-[1320px] mx-auto px-4 sm:px-6 lg:px-8">
                 {/* White container with straight corners */}
-                <div className="relative bg-white py-8 px-8">
+                <div className="relative bg-white py-8 px-8 shadow-sm">
                     {/* Header */}
                     <div className="flex items-center justify-between mb-6">
                         <h2 className="text-xl md:text-2xl font-semibold text-[var(--color-pharma-blue)]">
