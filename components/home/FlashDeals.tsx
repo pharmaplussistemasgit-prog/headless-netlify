@@ -1,13 +1,13 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { ReactNode, useState, useEffect } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { ChevronLeft, ChevronRight, Plus } from 'lucide-react';
 import { Product } from '@/types/woocommerce';
 
 interface FlashDealsProps {
-    title?: string;
+    title?: ReactNode | string;
     products: Product[];
 }
 

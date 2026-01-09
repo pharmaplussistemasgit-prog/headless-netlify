@@ -31,6 +31,7 @@ export interface MappedProduct {
     images: string[];
     categories: { id: number; name: string; slug: string }[];
     shortDescription: string; // HTML limpio o texto
+    description?: string; // HTML completo
 
     // Atributos Farmacéuticos
     brand: string | null;

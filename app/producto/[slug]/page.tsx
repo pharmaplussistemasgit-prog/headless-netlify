@@ -41,6 +41,7 @@ export default async function ProductPage(props: ProductPageProps) {
         { id: "id", label: "id", source: "id", type: "any" },
         { id: "name", label: "name", source: "name", type: "any" },
         { id: "slug", label: "slug", source: "slug", type: "any" },
+        { id: "sku", label: "sku", source: "sku", type: "any" },
         { id: "price", label: "price", source: "price", type: "any" },
         { id: "regular_price", label: "regular_price", source: "regular_price", type: "any" },
         { id: "sale_price", label: "sale_price", source: "sale_price", type: "any" },
@@ -55,7 +56,36 @@ export default async function ProductPage(props: ProductPageProps) {
         { id: "type", label: "type", source: "type", type: "any" },
     ]) as unknown as MappedProduct;
 
+    // Fetch related products (same category)
+    let relatedProducts: any[] = [];
+    if (product.categories && product.categories.length > 0) {
+        const { getProducts } = await import("@/lib/woocommerce");
+        const categoryId = product.categories[0].id;
+        const { products } = await getProducts({
+            category: String(categoryId),
+            perPage: 10
+        });
+        // Filter out current product
+        relatedProducts = products.filter(p => p.id !== product.id);
+    }
+
+    // Mock "Otras personas también vieron" (random products or from another category/tag if available)
+    // For now, we reuse related products logic but maybe limit or shuffle if we had a better shuffling mechanism without extra API calls.
+    // In a real scenario, this would come from analytics or a specific "cross-sell" API.
+    // We will just fetch a general list to populate the UI structure as requested.
+    let alsoViewedProducts: any[] = [];
+    {
+        const { getProducts } = await import("@/lib/woocommerce");
+        // Fetching generally popular/recent products
+        const { products } = await getProducts({ perPage: 8, orderby: 'popularity' });
+        alsoViewedProducts = products.filter(p => p.id !== product.id).slice(0, 10);
+    }
+
     return (
-        <ProductDetails product={mappedProduct} />
+        <ProductDetails
+            product={mappedProduct}
+            relatedProducts={relatedProducts}
+            alsoViewedProducts={alsoViewedProducts}
+        />
     );
 }

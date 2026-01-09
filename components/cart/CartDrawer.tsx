@@ -146,14 +146,23 @@ export default function CartDrawer() {
                                     <span>Total</span>
                                     <span>${cartTotal.toLocaleString()}</span>
                                 </div>
-                                <Link
-                                    href="/checkout"
-                                    onClick={toggleCart}
-                                    id="btn-proceed-to-checkout"
-                                    className="block w-full bg-[var(--color-action-green)] hover:bg-green-700 text-white font-bold py-3 px-4 rounded-full text-center transition-colors shadow-md"
-                                >
-                                    Ir a Pagar
-                                </Link>
+                                <div className="grid grid-cols-2 gap-3">
+                                    <Link
+                                        href="/carrito"
+                                        onClick={toggleCart}
+                                        className="block w-full bg-white border-2 border-[var(--color-pharma-blue)] text-[var(--color-pharma-blue)] font-bold py-3 px-4 rounded-full text-center transition-all hover:bg-gray-50"
+                                    >
+                                        Ver Carrito
+                                    </Link>
+                                    <Link
+                                        href="/checkout"
+                                        onClick={toggleCart}
+                                        id="btn-proceed-to-checkout"
+                                        className="block w-full bg-[var(--color-pharma-blue)] hover:bg-[var(--color-blue-classic)] text-white font-bold py-3 px-4 rounded-full text-center transition-all shadow-md hover:shadow-lg hover:scale-[1.02]"
+                                    >
+                                        Ir a Pagar
+                                    </Link>
+                                </div>
                             </div>
                         )}
                     </motion.div>

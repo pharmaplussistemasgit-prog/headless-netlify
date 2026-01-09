@@ -126,14 +126,26 @@ export default async function HomePage() {
       {/* Category Icons */}
       <CategoryIconsSection />
 
-      {/* Recommended Section (New, using featured data) */}
-      {/* Force rebuild: Updated columns to 4 */}
-      <RecommendedSection products={featuredResult.products} />
+      {/* Recommended Section (Complementa tu bienestar) */}
+      <RecommendedSection
+        products={featuredResult.products}
+        title={
+          <span>
+            <span className="text-[var(--color-pharma-blue)] italic font-bold">Complementa tu </span>
+            <span className="text-[var(--color-pharma-green)] font-extrabold">bienestar...</span>
+          </span>
+        }
+      />
 
       {/* Featured Products Grid */}
       {featuredResult.products.length > 0 && (
         <FeaturedProducts
-          title="Estos productos te pueden interesar"
+          title={
+            <span>
+              <span className="text-[var(--color-pharma-blue)] italic font-bold">Estos productos te pueden </span>
+              <span className="text-[var(--color-pharma-green)] font-extrabold">interesar...</span>
+            </span>
+          }
           products={featuredResult.products}
         />
       )}
@@ -144,7 +156,12 @@ export default async function HomePage() {
       {/* Flash Deals Section */}
       {flashDealsProducts.length > 0 && (
         <FlashDeals
-          title="Mundo Ofertas"
+          title={
+            <span>
+              <span className="text-[var(--color-pharma-blue)] italic font-bold">Mundo </span>
+              <span className="text-[var(--color-pharma-green)] font-extrabold">Ofertas</span>
+            </span>
+          }
           products={flashDealsProducts}
         />
       )}

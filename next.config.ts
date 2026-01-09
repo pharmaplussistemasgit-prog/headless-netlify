@@ -41,7 +41,12 @@ const nextConfig: NextConfig = {
       },
       {
         source: '/product/:slug',
-        destination: '/producto/:slug',
+        destination: '/:slug',
+        permanent: true,
+      },
+      {
+        source: '/producto/:slug',
+        destination: '/:slug',
         permanent: true,
       },
       {
@@ -49,10 +54,13 @@ const nextConfig: NextConfig = {
         destination: '/categoria/:slug',
         permanent: true,
       },
+    ];
+  },
+  async rewrites() {
+    return [
       {
-        source: '/checkout',
-        destination: '/finalizar-compra',
-        permanent: true,
+        source: '/finalizar-compra',
+        destination: '/checkout',
       },
     ];
   },

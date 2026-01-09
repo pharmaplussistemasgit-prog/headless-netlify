@@ -224,7 +224,7 @@ export default function QuickAddModal({
                         </button>
 
                         <Link
-                            href={`/producto/${product?.slug}`}
+                            href={`/${product?.slug}`}
                             onClick={onClose}
                             className="block w-full text-center py-2 text-gray-500 hover:text-[var(--color-pharma-blue)] text-sm font-semibold transition-colors decoration-2 hover:underline underline-offset-4"
                         >

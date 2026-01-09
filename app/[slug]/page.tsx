@@ -1,9 +1,11 @@
 import { notFound } from "next/navigation";
-import { getProductBySlug, getColorOptionsFromVariations, getSizeOptionsFromVariations, getProductVariations } from "@/lib/woocommerce";
-import ProductPageFigma from "@/components/product/ProductPageFigma";
-import { applyMapping } from "@/lib/mapping";
+import { getProductBySlug } from "@/lib/woocommerce";
+import ProductDetails from "@/components/product/ProductDetails";
+import { mapWooProduct } from "@/lib/mappers";
+import { WooProduct } from "@/types/product";
 
-// Forzar revalidación cada 60 segundos para evitar productos desactualizados
+import { revalidatePath } from "next/cache";
+
 export const revalidate = 60;
 
 interface ProductPageProps {
@@ -36,38 +38,34 @@ export default async function ProductPage(props: ProductPageProps) {
         notFound();
     }
 
-    const [colorOptions, sizeOptions, variations] = await Promise.all([
-        getColorOptionsFromVariations(product.id),
-        getSizeOptionsFromVariations(product.id),
-        getProductVariations(product.id),
-    ]);
+    const mappedProduct = mapWooProduct(product as unknown as WooProduct);
 
-    const mappedProduct = applyMapping(product, [
-        { id: "id", label: "id", source: "id", type: "any" },
-        { id: "name", label: "name", source: "name", type: "any" },
-        { id: "slug", label: "slug", source: "slug", type: "any" },
-        { id: "price", label: "price", source: "price", type: "any" },
-        { id: "regular_price", label: "regular_price", source: "regular_price", type: "any" },
-        { id: "sale_price", label: "sale_price", source: "sale_price", type: "any" },
-        { id: "description", label: "description", source: "description", type: "any" },
-        { id: "short_description", label: "short_description", source: "short_description", type: "any" },
-        { id: "images", label: "images", source: "images", type: "any" },
-        { id: "categories", label: "categories", source: "categories", type: "any" },
-        { id: "tags", label: "tags", source: "tags", type: "any" },
-        { id: "attributes", label: "attributes", source: "attributes", type: "any" },
-        { id: "stock_status", label: "stock_status", source: "stock_status", type: "any" },
-        { id: "stock_quantity", label: "stock_quantity", source: "stock_quantity", type: "any" },
-        { id: "type", label: "type", source: "type", type: "any" },
-    ]);
+    // Fetch related products (same category)
+    let relatedProducts: any[] = [];
+    if (product.categories && product.categories.length > 0) {
+        const { getProducts } = await import("@/lib/woocommerce");
+        const categoryId = product.categories[0].id;
+        const { products } = await getProducts({
+            category: String(categoryId),
+            perPage: 10
+        });
+        // Filter out current product
+        relatedProducts = products.filter(p => p.id !== product.id);
+    }
+
+    // Mock "Otras personas también vieron"
+    let alsoViewedProducts: any[] = [];
+    {
+        const { getProducts } = await import("@/lib/woocommerce");
+        const { products } = await getProducts({ perPage: 8, orderby: 'popularity' });
+        alsoViewedProducts = products.filter(p => p.id !== product.id).slice(0, 10);
+    }
 
     return (
-        <ProductPageFigma
-            mapped={mappedProduct}
-            images={mappedProduct.images || []}
-            colorOptions={colorOptions}
-            sizeOptions={sizeOptions}
-            variations={variations}
-            slug={mappedProduct.slug}
+        <ProductDetails
+            product={mappedProduct}
+            relatedProducts={relatedProducts}
+            alsoViewedProducts={alsoViewedProducts}
         />
     );
 }

@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { ReactNode, useState, useEffect } from 'react';
 import Link from 'next/link';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 import { Product } from '@/types/woocommerce';
@@ -9,7 +9,7 @@ import { mapWooProduct } from '@/lib/mappers';
 import { WooProduct } from '@/types/product';
 
 interface FeaturedProductsProps {
-    title?: string;
+    title?: ReactNode | string;
     products: Product[];
 }
 

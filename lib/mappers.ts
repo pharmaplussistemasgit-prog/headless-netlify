@@ -30,7 +30,10 @@ export function mapWooProduct(p: WooProduct): MappedProduct {
     }
 
     const stock = p.stock_quantity;
-    const isInStock = p.stock_status === 'instock' && (stock === null || stock > 0);
+    // Strict logic requested by user:
+    // Product MUST have explicit stock quantity > 0 to be purchasable.
+    // 'instock' status alone is NOT enough if quantity is null or 0.
+    const isInStock = p.stock_status === 'instock' && stock !== null && stock > 0;
     const showExactStock = stock !== null && stock < 10 && stock > 0;
 
     // 3. Imágenes

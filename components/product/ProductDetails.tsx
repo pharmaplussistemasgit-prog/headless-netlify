@@ -1,20 +1,31 @@
 'use client';
 
 import { useState } from 'react';
+import Link from 'next/link';
 import Image from 'next/image';
-import { Minus, Plus, ShoppingCart, Check, Info, ShieldCheck } from 'lucide-react';
+import { Minus, Plus, ShoppingCart, Check, Info, ShieldCheck, MessageCircle, Facebook, Twitter } from 'lucide-react';
 import { useCart } from '@/context/CartContext';
 import { toast } from 'sonner';
 import { MappedProduct } from '@/types/product';
+import RecommendedSection from '@/components/home/RecommendedSection';
 
 interface ProductDetailsProps {
     product: MappedProduct;
+    relatedProducts?: any[];
+    alsoViewedProducts?: any[];
 }
 
-export default function ProductDetails({ product }: ProductDetailsProps) {
+export default function ProductDetails({ product, relatedProducts = [], alsoViewedProducts = [] }: ProductDetailsProps) {
     const { addItem } = useCart();
     const [quantity, setQuantity] = useState(1);
-    const [activeImage, setActiveImage] = useState(product.images[0] || '/placeholder.png');
+    const [activeImage, setActiveImage] = useState(product.images[0]);
+
+    // Helper to get image URL safely
+    const getImgSrc = (img: any) => {
+        if (!img) return '/placeholder.png';
+        if (typeof img === 'string') return img;
+        return img.src || '/placeholder.png';
+    };
 
     const handleQuantityChange = (delta: number) => {
         const newQty = quantity + delta;
@@ -28,7 +39,7 @@ export default function ProductDetails({ product }: ProductDetailsProps) {
             id: product.id,
             name: product.name,
             price: product.price,
-            image: product.images[0] || '/placeholder.png',
+            image: getImgSrc(product.images[0]),
             quantity: quantity,
             slug: product.slug,
         });
@@ -36,145 +47,220 @@ export default function ProductDetails({ product }: ProductDetailsProps) {
     };
 
     return (
-        <div className="bg-white min-h-screen pb-12">
-            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-                {/* Breadcrumb Placeholder */}
-                <div className="text-sm text-gray-500 mb-6 flex items-center gap-2">
-                    <span>Inicio</span>
-                    <span>/</span>
-                    <span>{product.categories?.[0]?.name || 'Tienda'}</span>
-                    <span>/</span>
-                    <span className="font-semibold text-[var(--color-primary-blue)]">{product.name}</span>
-                </div>
+        <div className="bg-[var(--color-bg-light)] min-h-screen">
+            <div className="w-full lg:w-[90%] mx-auto px-4 sm:px-6 lg:px-0 py-8">
+                {/* Breadcrumb */}
+                <nav className="flex items-center text-sm text-gray-500 mb-8 overflow-x-auto whitespace-nowrap pb-2">
+                    <Link href="/" className="hover:text-[var(--color-pharma-blue)] transition-colors">Home</Link>
+                    <span className="mx-2 text-gray-300">/</span>
+                    <Link href="/tienda" className="hover:text-[var(--color-pharma-blue)] transition-colors">Salud</Link>
+                    {product.categories?.[0] && (
+                        <>
+                            <span className="mx-2 text-gray-300">/</span>
+                            <span className="text-[var(--color-pharma-blue)] font-medium">{product.categories[0].name}</span>
+                        </>
+                    )}
+                    <span className="mx-2 text-gray-300">/</span>
+                    <span className="text-[var(--color-pharma-blue)] truncate">{product.name}</span>
+                </nav>
 
-                <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
-                    {/* Left: Image Gallery */}
-                    <div className="space-y-4">
-                        <div className="relative aspect-square bg-gray-50 rounded-2xl overflow-hidden border border-gray-100">
-                            <Image
-                                src={activeImage}
-                                alt={product.name}
-                                fill
-                                className="object-contain p-8 mix-blend-multiply"
-                                priority
-                            />
-                            {product.isOnSale && product.discountPercentage && (
-                                <div className="absolute top-4 left-4 bg-red-600 text-white text-xs font-bold px-3 py-1 rounded-full shadow-sm">
-                                    -{product.discountPercentage}%
+                <div className="bg-white rounded-3xl shadow-sm p-6 lg:p-10 mb-5">
+                    <div className="grid grid-cols-1 lg:grid-cols-12 gap-12">
+                        {/* Left Column: Gallery (5 cols) */}
+                        <div className="lg:col-span-5 space-y-6">
+                            <div className="relative aspect-square bg-white rounded-2xl overflow-hidden border border-gray-100 group">
+                                <Image
+                                    src={getImgSrc(activeImage)}
+                                    alt={product.name}
+                                    fill
+                                    className="object-contain p-8 transition-transform duration-500 group-hover:scale-110"
+                                    priority
+                                />
+                                {product.isOnSale && product.discountPercentage && (
+                                    <div className="absolute top-4 left-4 bg-[#FF4D8D] text-white text-sm font-bold px-3 py-1 rounded-full shadow-sm">
+                                        -{product.discountPercentage}%
+                                    </div>
+                                )}
+                            </div>
+
+                            {product.images.length > 1 && (
+                                <div className="flex gap-4 overflow-x-auto pb-2 scrollbar-none">
+                                    {product.images.map((img, idx) => (
+                                        <button
+                                            key={idx}
+                                            onClick={() => setActiveImage(img)}
+                                            className={`relative w-20 h-20 rounded-xl border-2 overflow-hidden flex-shrink-0 bg-white transition-all ${getImgSrc(activeImage) === getImgSrc(img)
+                                                ? 'border-[var(--color-pharma-blue)] shadow-md scale-95'
+                                                : 'border-transparent hover:border-gray-200'
+                                                }`}
+                                        >
+                                            <Image
+                                                src={getImgSrc(img)}
+                                                alt={`${product.name} thumbnail ${idx + 1}`}
+                                                fill
+                                                className="object-contain p-2"
+                                            />
+                                        </button>
+                                    ))}
                                 </div>
                             )}
                         </div>
-                        {product.images.length > 1 && (
-                            <div className="flex gap-4 overflow-x-auto pb-2 scrollbar-hide">
-                                {product.images.map((img, idx) => (
+
+                        {/* Right Column: Info (7 cols) */}
+                        <div className="lg:col-span-7 flex flex-col">
+                            <div className="flex-1">
+                                <h1 className="text-2xl md:text-3xl font-bold text-[var(--color-pharma-blue)] mb-2 leading-tight">
+                                    {product.name}
+                                </h1>
+
+                                <div className="flex items-center gap-4 text-sm text-gray-500 mb-6 font-medium">
+                                    {product.sku && (
+                                        <span className="bg-gray-100 px-2 py-1 rounded text-xs tracking-wider uppercase">REFERENCIA: {product.sku}</span>
+                                    )}
+                                    <div className="flex items-center gap-1 text-yellow-400">
+                                        {/* Valoración falsa fija para replicar UI "5 estrellas (1)" si se requiere, pero usuario dijo quitar sistema de reseñas.
+                                           Mantengo limpio según instrucción "eliminemos sistema de reseñas". */}
+                                    </div>
+                                </div>
+
+                                <div className="flex flex-col mb-8">
+                                    <div className="flex items-baseline gap-4">
+                                        <span className="text-4xl font-extrabold text-[var(--color-pharma-green)]">
+                                            ${product.price.toLocaleString('es-CO')}
+                                        </span>
+                                        {product.isOnSale && (
+                                            <span className="text-lg text-gray-400 line-through decoration-gray-300">
+                                                ${product.regularPrice.toLocaleString('es-CO')}
+                                            </span>
+                                        )}
+                                    </div>
+                                    <span className="text-xs text-gray-500 mt-1 font-medium">
+                                        Unidad a ${(product.price / 1).toLocaleString('es-CO')}
+                                    </span>
+                                </div>
+
+                                {/* Divider */}
+                                <div className="w-full h-px bg-gray-100 mb-8" />
+
+                                <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-4 mb-8">
+                                    {/* Quantity */}
+                                    <div className="flex items-center border border-[var(--color-pharma-blue)] rounded-lg h-12 w-full sm:w-auto overflow-hidden">
+                                        <button
+                                            onClick={() => handleQuantityChange(-1)}
+                                            className="w-12 h-full flex items-center justify-center bg-[var(--color-pharma-blue)] text-white hover:bg-blue-800 transition-colors disabled:opacity-50"
+                                            disabled={quantity <= 1}
+                                        >
+                                            <Minus size={18} />
+                                        </button>
+                                        <div className="w-16 h-full flex items-center justify-center font-bold text-[var(--color-pharma-blue)] text-lg bg-white">
+                                            {quantity}
+                                        </div>
+                                        <button
+                                            onClick={() => handleQuantityChange(1)}
+                                            className="w-12 h-full flex items-center justify-center bg-[var(--color-pharma-blue)] text-white hover:bg-blue-800 transition-colors disabled:opacity-50"
+                                            disabled={product.stock ? quantity >= product.stock : false}
+                                        >
+                                            <Plus size={18} />
+                                        </button>
+                                    </div>
+
+                                    {/* Add to Cart */}
                                     <button
-                                        key={idx}
-                                        onClick={() => setActiveImage(img)}
-                                        className={`relative w-20 h-20 rounded-lg border-2 overflow-hidden flex-shrink-0 bg-gray-50 ${activeImage === img ? 'border-[var(--color-primary-blue)]' : 'border-transparent hover:border-gray-200'}`}
+                                        onClick={handleAddToCart}
+                                        disabled={!product.isInStock}
+                                        className="w-full bg-[var(--color-pharma-blue)] text-white h-14 rounded-xl font-bold text-lg hover:bg-blue-800 transition-all shadow-lg hover:shadow-xl hover:-translate-y-0.5 flex items-center justify-center gap-2 disabled:bg-gray-300 disabled:cursor-not-allowed disabled:shadow-none disabled:translate-y-0 uppercase tracking-wider"
                                     >
-                                        <Image
-                                            src={img}
-                                            alt={`${product.name} thumbnail ${idx + 1}`}
-                                            fill
-                                            className="object-contain p-2 mix-blend-multiply"
-                                        />
+                                        <ShoppingCart size={20} />
+                                        <span>Agregar al Carrito</span>
                                     </button>
-                                ))}
+                                </div>
+
+                                <div className="flex items-center gap-2 text-sm text-gray-400">
+                                    <span>Comparte</span>
+                                    <div className="flex gap-2">
+                                        <button className="p-1.5 rounded-full bg-[#25D366] text-white hover:scale-110 transition-transform"><MessageCircle size={16} /></button>
+                                        <button className="p-1.5 rounded-full bg-[#1877F2] text-white hover:scale-110 transition-transform"><Facebook size={16} /></button>
+                                        <button className="p-1.5 rounded-full bg-[#1DA1F2] text-white hover:scale-110 transition-transform"><Twitter size={16} /></button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            {/* Specs Section - 90% Page Width / 90% Inner Width */}
+            <div className="w-full lg:w-[90%] mx-auto bg-white rounded-3xl shadow-sm p-6 lg:p-10 mb-5">
+                <div className="w-full lg:w-[90%] mx-auto">
+                    <h3 className="text-2xl font-bold text-[var(--color-pharma-blue)] mb-8">Especificaciones:</h3>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-x-12 gap-y-4">
+                        {product.brand && (
+                            <div className="flex justify-between border-b border-gray-50 pb-3">
+                                <span className="font-bold text-[var(--color-pharma-blue)] text-base">Marca</span>
+                                <span className="text-gray-600 text-base uppercase">{product.brand}</span>
+                            </div>
+                        )}
+                        <div className="flex justify-between border-b border-gray-50 pb-3">
+                            <span className="font-bold text-[var(--color-pharma-blue)] text-base">Presentación</span>
+                            <span className="text-gray-600 text-base uppercase">UNIDAD</span>
+                        </div>
+                        {product.invima && (
+                            <div className="flex justify-between border-b border-gray-50 pb-3">
+                                <span className="font-bold text-[var(--color-pharma-blue)] text-base">ID Invima</span>
+                                <span className="text-gray-600 text-base">{product.invima}</span>
+                            </div>
+                        )}
+                        {product.productType && (
+                            <div className="flex justify-between border-b border-gray-50 pb-3">
+                                <span className="font-bold text-[var(--color-pharma-blue)] text-base">Tipo de Producto</span>
+                                <span className="text-gray-600 text-base uppercase">{product.productType}</span>
                             </div>
                         )}
                     </div>
-
-                    {/* Right: Product Info */}
-                    <div className="flex flex-col">
-                        <div className="flex-1">
-                            {product.brand && (
-                                <p className="text-sm font-bold text-[var(--color-primary-green)] uppercase tracking-wide mb-2">
-                                    {product.brand}
-                                </p>
-                            )}
-                            <h1 className="text-3xl md:text-4xl font-bold text-[var(--color-primary-blue)] mb-4 leading-tight">
-                                {product.name}
-                            </h1>
-
-                            <div className="flex items-center gap-4 mb-6">
-                                <div className="text-3xl font-bold text-[var(--color-pharma-green)]">
-                                    ${product.price.toLocaleString('es-CO')}
-                                </div>
-                                {product.isOnSale && (
-                                    <div className="text-lg text-gray-400 line-through">
-                                        ${product.regularPrice.toLocaleString('es-CO')}
-                                    </div>
-                                )}
-                            </div>
-
-                            <div className="prose prose-sm text-gray-600 mb-8 max-w-none" dangerouslySetInnerHTML={{ __html: product.shortDescription }} />
-
-                            {/* Attributes / Badges */}
-                            <div className="grid grid-cols-2 gap-4 mb-8">
-                                {product.isInStock ? (
-                                    <div className="flex items-center gap-2 text-green-700 bg-green-50 px-3 py-2 rounded-lg text-sm font-medium">
-                                        <Check size={18} />
-                                        <span>Disponible en stock</span>
-                                    </div>
-                                ) : (
-                                    <div className="flex items-center gap-2 text-red-700 bg-red-50 px-3 py-2 rounded-lg text-sm font-medium">
-                                        <Info size={18} />
-                                        <span>Agotado</span>
-                                    </div>
-                                )}
-                                {product.requiresRx && (
-                                    <div className="flex items-center gap-2 text-blue-700 bg-blue-50 px-3 py-2 rounded-lg text-sm font-medium">
-                                        <Info size={18} />
-                                        <span>Requiere Fórmula Médica</span>
-                                    </div>
-                                )}
-                            </div>
-
-                            {/* Actions */}
-                            <div className="flex items-center gap-4 pt-6 border-t border-gray-100">
-                                <div className="flex items-center border border-gray-300 rounded-lg h-12">
-                                    <button
-                                        onClick={() => handleQuantityChange(-1)}
-                                        className="w-12 h-full flex items-center justify-center hover:bg-gray-50 transition-colors text-gray-600 disabled:opacity-50"
-                                        disabled={quantity <= 1}
-                                    >
-                                        <Minus size={16} />
-                                    </button>
-                                    <span className="w-12 text-center font-bold text-[var(--color-primary-blue)] text-lg">
-                                        {quantity}
-                                    </span>
-                                    <button
-                                        onClick={() => handleQuantityChange(1)}
-                                        className="w-12 h-full flex items-center justify-center hover:bg-gray-50 transition-colors text-gray-600 disabled:opacity-50"
-                                        disabled={product.stock ? quantity >= product.stock : false}
-                                    >
-                                        <Plus size={16} />
-                                    </button>
-                                </div>
-
-                                <button
-                                    onClick={handleAddToCart}
-                                    disabled={!product.isInStock}
-                                    className="flex-1 bg-[var(--color-action-green)] text-white h-12 rounded-lg font-bold text-lg hover:bg-green-700 transition-all shadow-md hover:shadow-lg flex items-center justify-center gap-2 disabled:bg-gray-300 disabled:cursor-not-allowed"
-                                >
-                                    <ShoppingCart size={20} />
-                                    <span>Comprar</span>
-                                </button>
-                            </div>
-                        </div>
-
-                        {/* Extra Trust Badges */}
-                        <div className="mt-8 grid grid-cols-1 sm:grid-cols-2 gap-4">
-                            <div className="flex items-start gap-3 p-4 bg-gray-50 rounded-xl">
-                                <ShieldCheck className="text-[var(--color-primary-blue)] w-6 h-6 flex-shrink-0" />
-                                <div>
-                                    <h4 className="font-bold text-[var(--color-primary-blue)] text-sm">Garantía de Calidad</h4>
-                                    <p className="text-xs text-gray-500 mt-1">Productos 100% originales y certificados.</p>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
                 </div>
+            </div>
+
+            {/* Description Section - 90% Page Width / 90% Inner Width */}
+            <div className="w-full lg:w-[90%] mx-auto bg-white rounded-3xl shadow-sm p-6 lg:p-10 mb-5">
+                <div className="w-full lg:w-[90%] mx-auto">
+                    <h3 className="text-2xl font-bold text-[var(--color-pharma-blue)] mb-6">Descripción:</h3>
+                    <div
+                        className="prose prose-lg text-gray-600 max-w-none leading-relaxed"
+                        dangerouslySetInnerHTML={{ __html: product.description || product.shortDescription }}
+                    />
+                </div>
+            </div>
+
+            <div className="w-full lg:w-[90%] mx-auto pb-16">
+                {/* Related Products Carousel */}
+                {relatedProducts.length > 0 && (
+                    <div className="mb-5">
+                        <RecommendedSection
+                            products={relatedProducts}
+                            title={
+                                <span>
+                                    <span className="text-[var(--color-pharma-blue)] italic font-bold">Productos </span>
+                                    <span className="text-[var(--color-pharma-green)] font-extrabold">Similares...</span>
+                                </span>
+                            }
+                        />
+                    </div>
+                )}
+
+                {/* Also Viewed Carousel */}
+                {alsoViewedProducts.length > 0 && (
+                    <div>
+                        <RecommendedSection
+                            products={alsoViewedProducts}
+                            title={
+                                <span>
+                                    <span className="text-[var(--color-pharma-blue)] italic font-bold">Otras personas </span>
+                                    <span className="text-[var(--color-pharma-green)] font-white font-extrabold">también vieron...</span>
+                                </span>
+                            }
+                        />
+                    </div>
+                )}
             </div>
         </div>
     );
