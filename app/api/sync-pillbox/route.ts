@@ -123,7 +123,7 @@ export async function GET(request: NextRequest) {
         }
 
         // Map back to frontend structure if needed
-        const mappedReminders = reminders.map(r => ({
+        const mappedReminders = (reminders || []).map((r: any) => ({
             id: r.id,
             productName: r.medication_name,
             dosage: r.dosage,
