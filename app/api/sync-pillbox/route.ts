@@ -55,7 +55,8 @@ export async function POST(request: NextRequest) {
         // So we should upsert.
 
         if (reminders.length > 0) {
-            const { error: upsertError } = await supabaseAdmin
+            // Bypass strict type check for "reminders" table which is not in generated types yet
+            const { error: upsertError } = await (supabaseAdmin as any)
                 .from('reminders')
                 .upsert(
                     reminders.map((r: any) => ({
@@ -111,7 +112,7 @@ export async function GET(request: NextRequest) {
         }
 
         // 2. Fetch from Supabase
-        const { data: reminders, error } = await supabaseAdmin
+        const { data: reminders, error } = await (supabaseAdmin as any)
             .from('reminders')
             .select('*')
             .eq('user_id', userId);
