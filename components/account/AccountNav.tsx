@@ -19,7 +19,15 @@ export default function AccountNav() {
         router.refresh();
     };
 
-    const sections = [
+    interface NavItem {
+        name: string;
+        href: string;
+        icon: any;
+        highlight?: boolean;
+        color?: string;
+    }
+
+    const sections: { title: string; items: NavItem[] }[] = [
         {
             title: "Créditos y cupones",
             items: [
