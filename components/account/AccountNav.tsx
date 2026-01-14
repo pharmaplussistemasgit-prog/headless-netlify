@@ -2,7 +2,11 @@
 
 import { usePathname } from 'next/navigation';
 import Link from 'next/link';
-import { Package, MapPin, User, LogOut, LayoutDashboard } from 'lucide-react';
+import {
+    Package, MapPin, User, LogOut, LayoutDashboard, Pill,
+    Ticket, Crown, CreditCard, Lock, Bell, Heart, Store,
+    Shield, HelpCircle, Headphones, ChevronRight
+} from 'lucide-react';
 import { auth } from '@/lib/auth';
 import { useRouter } from 'next/navigation';
 
@@ -15,39 +19,98 @@ export default function AccountNav() {
         router.refresh();
     };
 
-    const navItems = [
-        { name: 'Escritorio', href: '/mi-cuenta', icon: LayoutDashboard },
-        { name: 'Mis Pedidos', href: '/mi-cuenta/pedidos', icon: Package },
-        { name: 'Direcciones', href: '/mi-cuenta/direcciones', icon: MapPin },
-        { name: 'Detalles de la cuenta', href: '/mi-cuenta/detalles', icon: User },
+    const sections = [
+        {
+            title: "Créditos y cupones",
+            items: [
+                { name: '¿Tienes un cupón?', href: '/mi-cuenta/cupones', icon: Ticket, highlight: true }
+            ]
+        },
+        {
+            title: "Tu cuenta",
+            items: [
+                { name: 'Pharma Prime', href: '/prime', icon: Crown, color: 'text-blue-500' },
+                { name: 'Mi perfil', href: '/mi-cuenta/detalles', icon: User },
+                { name: 'Mis direcciones', href: '/mi-cuenta/direcciones', icon: MapPin },
+                { name: 'Mis tarjetas', href: '/mi-cuenta/tarjetas', icon: CreditCard },
+                { name: 'Cambia tu contraseña', href: '/mi-cuenta/password', icon: Lock },
+                { name: 'Mis compras', href: '/mi-cuenta/pedidos', icon: Package },
+                { name: 'Notificaciones', href: '/mi-cuenta/notificaciones', icon: Bell },
+                { name: 'Pastillero virtual', href: '/pastillero', icon: Pill, color: 'text-[var(--color-pharma-blue)]' },
+            ]
+        },
+        {
+            title: "Favoritos y Tiendas",
+            items: [
+                { name: 'Mis favoritos', href: '/wishlist', icon: Heart },
+                { name: 'Mis tiendas', href: '/tiendas', icon: Store },
+            ]
+        },
+        {
+            title: "Ajustes y ayuda",
+            items: [
+                { name: 'Políticas de privacidad', href: '/politica-de-privacidad', icon: Shield },
+                { name: 'Soporte', href: '/contacto', icon: HelpCircle },
+                { name: 'Contáctenos', href: '/contacto', icon: Headphones },
+            ]
+        }
     ];
 
     return (
-        <nav className="space-y-1">
-            {navItems.map((item) => {
-                const isActive = pathname === item.href;
-                return (
-                    <Link
-                        key={item.name}
-                        href={item.href}
-                        className={`flex items-center gap-3 px-4 py-3 text-sm font-medium rounded-xl transition-all ${isActive
-                                ? 'bg-[var(--color-pharma-blue)] text-white shadow-md'
-                                : 'text-gray-600 hover:bg-gray-100'
-                            }`}
-                    >
-                        <item.icon className="w-5 h-5" />
-                        {item.name}
-                    </Link>
-                );
-            })}
+        <nav className="space-y-8">
+            {sections.map((section, idx) => (
+                <div key={idx}>
+                    {section.title && (
+                        <h3 className="px-4 text-xs font-bold text-gray-400 uppercase tracking-wider mb-2">
+                            {section.title}
+                        </h3>
+                    )}
+                    <div className="space-y-1">
+                        {section.items.map((item) => {
+                            const isActive = pathname === item.href;
+                            const Icon = item.icon;
 
-            <button
-                onClick={handleLogout}
-                className="w-full flex items-center gap-3 px-4 py-3 text-sm font-medium text-red-600 rounded-xl hover:bg-red-50 transition-all mt-4"
-            >
-                <LogOut className="w-5 h-5" />
-                Cerrar Sesión
-            </button>
+                            return (
+                                <Link
+                                    key={item.name}
+                                    href={item.href}
+                                    className={`
+                                        group flex items-center justify-between px-4 py-2.5 text-sm font-medium rounded-xl transition-all
+                                        ${isActive
+                                            ? 'bg-blue-50 text-[var(--color-pharma-blue)]'
+                                            : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'
+                                        }
+                                        ${item.highlight ? 'bg-gradient-to-r from-blue-500/10 to-purple-500/10 text-blue-700' : ''}
+                                    `}
+                                >
+                                    <div className="flex items-center gap-3">
+                                        <div className={`
+                                            w-8 h-8 rounded-full flex items-center justify-center transition-colors
+                                            ${isActive ? 'bg-white' : 'bg-gray-100 group-hover:bg-white'}
+                                        `}>
+                                            <Icon className={`w-4 h-4 ${item.color || (isActive ? 'text-[var(--color-pharma-blue)]' : 'text-gray-500 group-hover:text-gray-700')}`} />
+                                        </div>
+                                        <span>{item.name}</span>
+                                    </div>
+                                    <ChevronRight className={`w-4 h-4 text-gray-300 transition-transform ${isActive ? 'text-[var(--color-pharma-blue)]' : 'group-hover:translate-x-1'}`} />
+                                </Link>
+                            );
+                        })}
+                    </div>
+                </div>
+            ))}
+
+            <div className="pt-4 border-t border-gray-100">
+                <button
+                    onClick={handleLogout}
+                    className="w-full flex items-center gap-3 px-4 py-3 text-sm font-medium text-red-600 rounded-xl hover:bg-red-50 transition-all group"
+                >
+                    <div className="w-8 h-8 rounded-full bg-red-50 flex items-center justify-center group-hover:bg-red-100 transition-colors">
+                        <LogOut className="w-4 h-4 text-red-600" />
+                    </div>
+                    <span>Cerrar Sesión</span>
+                </button>
+            </div>
         </nav>
     );
 }

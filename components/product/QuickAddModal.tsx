@@ -139,7 +139,7 @@ export default function QuickAddModal({
                 </div>
 
                 {/* Right Side - Product Details */}
-                <div className="w-full md:w-1/2 p-6 md:p-10 flex flex-col overflow-y-auto [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none] min-w-0">
+                <div className="w-full md:w-1/2 p-6 md:p-10 pb-8 md:pb-12 flex flex-col overflow-y-auto [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none] min-w-0">
 
                     {/* Header Info */}
                     <div className="mb-6 pr-8">
@@ -220,13 +220,13 @@ export default function QuickAddModal({
                             className={`w-full py-4 bg-[var(--color-pharma-blue)] hover:bg-[#0044b3] text-white text-lg font-bold rounded-2xl transition-all shadow-lg shadow-blue-900/10 hover:shadow-blue-900/20 hover:-translate-y-0.5 flex items-center justify-center gap-3 ${isOutOfStock ? 'opacity-50 cursor-not-allowed grayscale' : ''}`}
                         >
                             <ShoppingCart className="w-6 h-6" />
-                            <span>{isOutOfStock ? 'Producto Agotado' : 'Agregar al Carrito'}</span>
+                            <span>{isOutOfStock ? 'Producto Agotado' : 'Agregar al carrito'}</span>
                         </button>
 
                         <Link
                             href={`/${product?.slug}`}
                             onClick={onClose}
-                            className="block w-full text-center py-2 text-gray-500 hover:text-[var(--color-pharma-blue)] text-sm font-semibold transition-colors decoration-2 hover:underline underline-offset-4"
+                            className="w-full py-3 bg-white border-2 border-[var(--color-pharma-blue)] text-[var(--color-pharma-blue)] hover:bg-blue-50 text-sm font-bold rounded-xl transition-all flex items-center justify-center shadow-sm hover:shadow-md"
                         >
                             Ver todos los detalles del producto
                         </Link>

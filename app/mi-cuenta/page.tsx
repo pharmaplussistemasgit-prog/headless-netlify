@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { auth } from '@/lib/auth';
-import { User, Package, LogOut, MapPin, CreditCard } from 'lucide-react';
+import { User, Package, LogOut, MapPin, CreditCard, Pill, Play } from 'lucide-react';
 import Link from 'next/link';
 
 export default function MiCuentaPage() {
@@ -42,12 +42,30 @@ export default function MiCuentaPage() {
             </div>
 
             {/* Dashboard Grid - Quick Glace */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                 <div className="bg-white p-6 rounded-2xl shadow-sm border border-gray-100">
                     <h3 className="text-lg font-bold text-gray-900 mb-2">Bienvenido de nuevo</h3>
                     <p className="text-gray-500 text-sm leading-relaxed">
-                        Desde el panel de control de tu cuenta puedes ver tus <Link href="/mi-cuenta/pedidos" className="text-[var(--color-pharma-blue)] font-bold hover:underline">pedidos recientes</Link>, gestionar tus <Link href="/mi-cuenta/direcciones" className="text-[var(--color-pharma-blue)] font-bold hover:underline">direcciones de envío y facturación</Link> y <Link href="/mi-cuenta/detalles" className="text-[var(--color-pharma-blue)] font-bold hover:underline">editar tu contraseña y los detalles de tu cuenta</Link>.
+                        Desde el panel de control de tu cuenta puedes ver tus <Link href="/mi-cuenta/pedidos" className="text-[var(--color-pharma-blue)] font-bold hover:underline">pedidos recientes</Link>, gestionar tus <Link href="/mi-cuenta/direcciones" className="text-[var(--color-pharma-blue)] font-bold hover:underline">direcciones</Link> y <Link href="/mi-cuenta/detalles" className="text-[var(--color-pharma-blue)] font-bold hover:underline">editar tu cuenta</Link>.
                     </p>
+                </div>
+
+                {/* Pillbox Card */}
+                <div className="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 flex flex-col items-center text-center">
+                    <div className="w-12 h-12 bg-blue-50 rounded-full flex items-center justify-center mb-4">
+                        <Pill className="w-6 h-6 text-[var(--color-pharma-blue)]" />
+                    </div>
+                    <h3 className="text-lg font-bold text-[var(--color-pharma-blue)] mb-2">Tu Pastillero Virtual</h3>
+                    <p className="text-gray-500 text-sm mb-6">
+                        Organiza tus medicamentos, recibe recordatorios y nunca olvides una toma.
+                    </p>
+                    <Link
+                        href="/pastillero"
+                        className="w-full py-3 bg-[var(--color-pharma-blue)] text-white font-bold rounded-xl hover:bg-blue-700 transition-colors flex items-center justify-center gap-2"
+                    >
+                        <Play className="w-4 h-4 fill-current" />
+                        Ingresar al Pastillero
+                    </Link>
                 </div>
 
                 <div className="bg-[var(--color-pharma-blue)] p-6 rounded-2xl text-white shadow-md relative overflow-hidden">

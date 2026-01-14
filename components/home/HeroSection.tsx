@@ -134,10 +134,10 @@ export default function HeroSection({ slides, featuredProds = [] }: HeroSectionP
                                 Organiza tus medicamentos, recibe recordatorios y nunca olvides una toma.
                             </p>
 
-                            <button className="w-full bg-[var(--color-pharma-blue)] hover:opacity-90 text-white font-bold py-2.5 rounded-full transition-all shadow-sm active:scale-95 text-sm flex items-center justify-center gap-2">
+                            <Link href="/pastillero" className="w-full bg-[var(--color-pharma-blue)] hover:opacity-90 text-white font-bold py-2.5 rounded-full transition-all shadow-sm active:scale-95 text-sm flex items-center justify-center gap-2">
                                 <Play className="w-4 h-4 fill-current" />
                                 <span>Ingresar al Pastillero</span>
-                            </button>
+                            </Link>
                         </div>
 
                         {/* 2. Advertising Promo Card */}

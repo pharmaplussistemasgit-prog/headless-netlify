@@ -13,11 +13,11 @@ export default function AddToCartButton({ disabled, onAdd }: AddToCartButtonProp
         id="btn-add-to-cart-main"
         disabled={disabled}
         onClick={onAdd}
-        className={`w-full md:w-auto px-6 py-3 rounded-md font-semibold transition
+        className={`w-full md:w-auto px-6 py-3 rounded-xl font-semibold transition shadow-sm hover:shadow-md
           ${disabled ? "bg-saprix-indigo/40 text-saprix-white/60 cursor-not-allowed" : "bg-saprix-indigo text-white hover:bg-saprix-indigo/90"}
         `}
       >
-        Añadir al Carrito
+        Agregar al carrito
       </button>
     </div>
   );

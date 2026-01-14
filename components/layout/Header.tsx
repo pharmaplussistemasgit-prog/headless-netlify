@@ -12,6 +12,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import LiveSearch from '@/components/search/LiveSearch';
 import CartBadge from './CartBadge';
 import AccountButton from './AccountButton';
+import { useGeolocation } from '@/hooks/useGeolocation';
 
 interface HeaderProps {
     categories?: CategoryTree[];
@@ -24,6 +25,7 @@ export default function Header({ categories = [] }: HeaderProps) {
     const [activeMobileCategory, setActiveMobileCategory] = useState<number | null>(null);
     const [hoveredCategoryId, setHoveredCategoryId] = useState<number | null>(null);
     const [searchTerm, setSearchTerm] = useState('');
+    const { city, loading, requestLocation } = useGeolocation();
 
     const categoryRef = useRef<HTMLDivElement>(null);
     const financiamientoRef = useRef<HTMLDivElement>(null);
@@ -72,9 +74,15 @@ export default function Header({ categories = [] }: HeaderProps) {
                         </div>
 
                         {/* Right: Location Selector */}
-                        <div className="flex items-center gap-2 cursor-pointer hover:text-[var(--color-pharma-blue)] transition-colors text-slate-700">
-                            <MapPin className="w-3.5 h-3.5" />
-                            <span className="font-medium">Bogotá, D.C.</span>
+                        <div
+                            className="flex items-center gap-2 cursor-pointer hover:text-[var(--color-pharma-blue)] transition-colors text-slate-700"
+                            onClick={requestLocation}
+                            title="Clic para actualizar ubicación"
+                        >
+                            <MapPin className={`w-3.5 h-3.5 ${loading ? 'animate-pulse text-[var(--color-pharma-blue)]' : ''}`} />
+                            <span className="font-medium">
+                                {loading ? "Localizando..." : (city || "Bogotá, D.C.")}
+                            </span>
                             <ChevronDown className="w-3 h-3" />
                         </div>
                     </div>

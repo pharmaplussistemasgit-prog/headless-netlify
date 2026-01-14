@@ -1,0 +1,90 @@
+"use client";
+
+import { useState, useEffect } from "react";
+
+interface LocationState {
+    city: string | null;
+    loading: boolean;
+    error: string | null;
+    requestLocation: () => void;
+}
+
+export function useGeolocation(): LocationState {
+    const [city, setCity] = useState<string | null>(null);
+    const [loading, setLoading] = useState(false);
+    const [error, setError] = useState<string | null>(null);
+
+    const requestLocation = () => {
+        setLoading(true);
+        setError(null);
+
+        if (!navigator.geolocation) {
+            setError("Geolocalización no soportada");
+            setLoading(false);
+            return;
+        }
+
+        navigator.geolocation.getCurrentPosition(
+            async (position) => {
+                const { latitude, longitude } = position.coords;
+
+                try {
+                    const response = await fetch(
+                        `https://nominatim.openstreetmap.org/reverse?format=json&lat=${latitude}&lon=${longitude}`
+                    );
+                    const data = await response.json();
+
+                    // Nominatim returns address object with flexible keys
+                    const address = data.address;
+                    console.log("📍 Dirección detectada (Nominatim):", address);
+
+                    // Prioritize City/Municipality/County over Town to avoid smaller adjacent localities
+                    const locationName =
+                        address.city ||
+                        address.municipality ||
+                        address.county ||
+                        address.town ||
+                        address.village ||
+                        "Ubicación detectada";
+
+                    setCity(locationName);
+
+                    // Simple caching to avoid re-fetching on valid session
+                    localStorage.setItem("pharma_user_location", locationName);
+                } catch (err) {
+                    console.error("Error reversing geocode:", err);
+                    setError("Error al obtener ciudad");
+                    setCity(null);
+                } finally {
+                    setLoading(false);
+                }
+            },
+            (err) => {
+                console.warn("Geolocation error:", err);
+                let errorMessage = "Ubicación no disponible";
+                if (err.code === 1) errorMessage = "Permiso denegado";
+                else if (err.code === 2) errorMessage = "Ubicación no disponible";
+                else if (err.code === 3) errorMessage = "Tiempo de espera agotado";
+
+                setError(errorMessage);
+                setLoading(false);
+            },
+            { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 } // High accuracy, no cache logic for GPS
+        );
+    };
+
+    // Auto-load from cache if available on mount
+    useEffect(() => {
+        const cached = localStorage.getItem("pharma_user_location");
+        if (cached) {
+            setCity(cached);
+        } else {
+            // Optional: Auto-request on first visit?
+            // Usually better to wait for user interaction or request explicitly to obey UX best practices,
+            // but for "automatic" request per user wish:
+            requestLocation();
+        }
+    }, []);
+
+    return { city, loading, error, requestLocation };
+}

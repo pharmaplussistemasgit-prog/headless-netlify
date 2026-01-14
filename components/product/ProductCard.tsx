@@ -8,6 +8,8 @@ import Link from "next/link";
 import { cn } from "@/lib/utils";
 import { MappedProduct } from "@/types/product";
 import { useQuickView } from "@/context/QuickViewContext";
+import { useWishlist } from "@/context/WishlistContext";
+import { Heart } from "lucide-react";
 
 interface ProductCardProps {
   product: MappedProduct;
@@ -15,6 +17,8 @@ interface ProductCardProps {
 
 export default function ProductCard({ product }: ProductCardProps) {
   const { openQuickView } = useQuickView();
+  const { toggleWishlist, isInWishlist } = useWishlist();
+  const isFavorite = isInWishlist(product.id);
 
   const formatPrice = (amount: number) => {
     return new Intl.NumberFormat('es-CO', {
@@ -28,12 +32,40 @@ export default function ProductCard({ product }: ProductCardProps) {
     openQuickView(product);
   };
 
+  const handleToggleWishlist = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    toggleWishlist({
+      id: product.id,
+      name: product.name,
+      price: product.price,
+      image: product.images[0] || '/placeholder.png',
+      slug: product.slug,
+      category: product.categories?.[0]?.name
+    });
+  };
+
   return (
     <>
       <Card
         className="h-full border border-gray-200 shadow-[0_2px_8px_rgba(0,0,0,0.05)] hover:shadow-[0_8px_24px_rgba(0,0,0,0.12)] transition-all duration-300 group rounded-xl bg-white overflow-hidden flex flex-col cursor-pointer"
         onClick={handleOpenModal}
       >
+
+        {/* Wishlist Button */}
+        <button
+          onClick={handleToggleWishlist}
+          className="absolute top-2 right-2 z-20 p-2 bg-white/80 backdrop-blur-sm rounded-full shadow-sm hover:bg-white hover:scale-110 transition-all group/wishlist"
+          aria-label={isFavorite ? "Eliminar de favoritos" : "Agregar a favoritos"}
+        >
+          <Heart
+            className={cn(
+              "w-4 h-4 transition-colors",
+              isFavorite
+                ? "fill-red-500 text-red-500"
+                : "text-gray-400 group-hover/wishlist:text-red-500"
+            )}
+          />
+        </button>
 
         {/* Badges */}
         <div className="absolute top-2 left-2 z-10 flex flex-col gap-1 items-start">
@@ -118,15 +150,15 @@ export default function ProductCard({ product }: ProductCardProps) {
                   handleOpenModal();
                 }}
                 className={cn(
-                  "w-full h-10 rounded-none font-bold text-sm uppercase tracking-wide shadow-none transition-all flex items-center justify-center gap-2",
+                  "w-full h-10 rounded-xl font-bold text-sm uppercase tracking-wide shadow-sm hover:shadow-md transition-all flex items-center justify-center gap-2",
                   product.isInStock
-                    ? "bg-[#0051cc] hover:bg-[#003d99] text-white"
+                    ? "bg-[var(--color-pharma-blue)] hover:bg-[#003d99] text-white"
                     : "bg-gray-100 text-gray-400 cursor-not-allowed border border-gray-200"
                 )}
               >
                 {product.isInStock ? (
                   <>
-                    <span>Comprar</span>
+                    <span>Agregar al carrito</span>
                   </>
                 ) : (
                   <>
