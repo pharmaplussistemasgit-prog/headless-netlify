@@ -39,6 +39,11 @@ export async function POST(request: NextRequest) {
             return NextResponse.json({ error: 'Invalid data format' }, { status: 400 });
         }
 
+        if (!supabaseAdmin) {
+            console.error('Supabase Client not initialized (Missing Env Vars)');
+            return NextResponse.json({ error: 'Sync Disabled Configuration Error' }, { status: 503 });
+        }
+
         // 2. Sync Logic (Simple Strategy: Overwrite/Merge)
         // Strategy: "Server Authority for ID match, Client for content"
         // For this phase, we'll do a simple "Save All" from client (Client -> Server)
@@ -96,8 +101,14 @@ export async function GET(request: NextRequest) {
             return NextResponse.json({ error: 'Invalid Token' }, { status: 401 });
         }
 
+
         const user = await response.json();
         const userId = String(user.id);
+
+        if (!supabaseAdmin) {
+            console.error('Supabase Client not initialized (Missing Env Vars)');
+            return NextResponse.json({ reminders: [] }); // Return empty if sync disabled
+        }
 
         // 2. Fetch from Supabase
         const { data: reminders, error } = await supabaseAdmin

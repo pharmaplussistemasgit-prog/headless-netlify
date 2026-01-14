@@ -11,13 +11,24 @@ if (!SUPABASE_URL || !SUPABASE_SERVICE_ROLE_KEY) {
 // Create a single supabase client for interacting with your database
 // This client has admin privileges (Service Role), so ONLY use it in API Routes (server-side).
 // NEVER expose this client to the browser.
-export const supabaseAdmin = createClient(
-    SUPABASE_URL || '',
-    SUPABASE_SERVICE_ROLE_KEY || '',
-    {
-        auth: {
-            persistSession: false, // We don't need to persist session for admin tasks
-            autoRefreshToken: false,
+let supabaseAdmin: ReturnType<typeof createClient> | null = null;
+
+if (SUPABASE_URL && SUPABASE_SERVICE_ROLE_KEY) {
+    supabaseAdmin = createClient(
+        SUPABASE_URL,
+        SUPABASE_SERVICE_ROLE_KEY,
+        {
+            auth: {
+                persistSession: false, // We don't need to persist session for admin tasks
+                autoRefreshToken: false,
+            }
         }
+    );
+} else {
+    // Only warn in development, avoid noise in build logs unless critical
+    if (process.env.NODE_ENV === 'development') {
+        console.warn("⚠️ Warning: Supabase Environment Variables missing. Silent Sync will be disabled.");
     }
-);
+}
+
+export { supabaseAdmin };
