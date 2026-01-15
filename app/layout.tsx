@@ -11,6 +11,7 @@ import { WishlistProvider } from "@/context/WishlistContext";
 import CartDrawer from "@/components/cart/CartDrawer";
 import { Toaster } from "sonner";
 import { getCategoryTreeData } from "@/lib/woocommerce";
+import { getShippingRates } from "@/lib/shipping";
 import BottomNav from "@/components/layout/BottomNav";
 import { QuickViewProvider } from "@/context/QuickViewContext";
 import GlobalQuickView from "@/components/product/GlobalQuickView";
@@ -32,6 +33,7 @@ export default async function RootLayout({
   children: React.ReactNode;
 }>) {
   const categories = await getCategoryTreeData();
+  const shippingRules = await getShippingRates();
 
   return (
     <html lang="es" suppressHydrationWarning>
@@ -49,7 +51,7 @@ export default async function RootLayout({
             <WishlistProvider>
               <QuickViewProvider>
                 <div className="flex flex-col min-h-screen">
-                  <Header categories={categories} />
+                  <Header categories={categories} shippingRules={shippingRules} />
                   <main className="flex-grow">{children}</main>
                   <Footer />
                   <CartDrawer />

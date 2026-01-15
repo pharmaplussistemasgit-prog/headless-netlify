@@ -6,6 +6,7 @@ import { X, ShoppingCart } from "lucide-react";
 import { useCart } from "@/context/CartContext";
 import { ensureHttps } from "@/lib/utils";
 import Link from "next/link";
+import ColdChainAlert from "@/components/product/ColdChainAlert";
 
 type ColorOption = { option: string; variations: number[]; image?: string };
 type SizeOption = { option: string; variations: number[] };
@@ -98,6 +99,17 @@ export default function QuickAddModal({
         onClose();
     }
 
+    // Zoom State
+    const [zoomPos, setZoomPos] = useState({ x: 0, y: 0 });
+    const [isZoomed, setIsZoomed] = useState(false);
+
+    const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
+        const { left, top, width, height } = e.currentTarget.getBoundingClientRect();
+        const x = ((e.clientX - left) / width) * 100;
+        const y = ((e.clientY - top) / height) * 100;
+        setZoomPos({ x, y });
+    };
+
     if (!isOpen) return null;
 
     return (
@@ -107,131 +119,170 @@ export default function QuickAddModal({
                 onClick={onClose}
             />
 
-            <div className="relative w-full max-w-4xl bg-white shadow-2xl rounded-3xl overflow-hidden flex flex-col md:flex-row max-h-[90vh] animate-in fade-in zoom-in-95 duration-200">
+            {/* Expanded width to max-w-6xl for desktop - Softer shadow */}
+            <div className="relative w-full max-w-6xl bg-white shadow-xl rounded-3xl overflow-hidden flex flex-col max-h-[90vh] animate-in fade-in zoom-in-95 duration-200">
 
-                {/* Close Button - Floating */}
+                {/* Close Button - Floating & Pharma Blue */}
                 <button
                     onClick={onClose}
-                    className="absolute top-4 right-4 z-20 p-2 bg-white/80 hover:bg-white text-gray-400 hover:text-gray-900 rounded-full transition-all shadow-sm backdrop-blur-md border border-gray-100"
+                    className="absolute top-4 right-4 z-50 p-2 bg-white/90 hover:bg-white text-[var(--color-pharma-blue)] hover:text-blue-700 rounded-full transition-all shadow-md backdrop-blur-md border border-blue-100/50"
                 >
                     <X className="w-5 h-5" />
                 </button>
 
-                {/* Left Side - Image Gallery */}
-                <div className="w-full md:w-1/2 bg-white relative border-r border-gray-100 h-[300px] md:h-auto">
-                    {/* Discount Badge */}
-                    {product?.discountPercentage && (
-                        <div className="absolute top-6 left-6 bg-[#FFD700] text-black text-xs font-black px-3 py-1 rounded-full shadow-sm z-10">
-                            -{product.discountPercentage}%
-                        </div>
-                    )}
+                {/* Content Area - Scrollbar Hidden but Scrollable */}
+                <div className="flex flex-col md:flex-row flex-grow overflow-y-auto [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
 
-                    <div className="relative w-full h-full">
-                        <Image
-                            src={mainImage}
-                            alt={product?.name || ""}
-                            fill
-                            className="object-contain p-4"
-                            priority
-                            sizes="(max-width: 768px) 100vw, 50vw"
-                        />
-                    </div>
-                </div>
-
-                {/* Right Side - Product Details */}
-                <div className="w-full md:w-1/2 p-6 md:p-10 pb-8 md:pb-12 flex flex-col overflow-y-auto [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none] min-w-0">
-
-                    {/* Header Info */}
-                    <div className="mb-6 pr-8">
-                        {product?.brand && (
-                            <span className="text-xs font-bold text-gray-400 uppercase tracking-[0.2em] mb-3 block">
-                                {product.brand}
-                            </span>
+                    {/* Left Side - Image Gallery with Zoom */}
+                    <div className="w-full md:w-1/2 bg-white relative border-r border-gray-50 p-2 md:p-4 flex flex-col justify-center items-center min-h-[350px]">
+                        {/* Discount Badge */}
+                        {product?.discountPercentage && (
+                            <div className="absolute top-6 left-6 bg-[#FFD700] text-black text-[10px] font-black px-2 py-0.5 rounded-full shadow-sm z-10">
+                                -{product.discountPercentage}%
+                            </div>
                         )}
-                        <h2 className="text-2xl md:text-3xl font-bold text-gray-900 leading-tight mb-4 break-words">
-                            {product?.name}
-                        </h2>
 
-                        <div className="flex items-end gap-3 mb-2">
-                            <span className="text-4xl font-extrabold text-[var(--color-pharma-green)] tracking-tight">
-                                {priceFmt.format(currentPrice)}
-                            </span>
-                            {product?.regularPrice > currentPrice && (
-                                <span className="text-lg text-gray-400 line-through mb-1.5 font-medium">
-                                    {priceFmt.format(product.regularPrice)}
+                        <div
+                            className="relative w-full h-[350px] md:h-[600px] cursor-zoom-in overflow-hidden"
+                            onMouseMove={handleMouseMove}
+                            onMouseEnter={() => setIsZoomed(true)}
+                            onMouseLeave={() => setIsZoomed(false)}
+                        >
+                            <Image
+                                src={mainImage}
+                                alt={product?.name || ""}
+                                fill
+                                className="object-contain transition-transform duration-200 ease-out"
+                                style={{
+                                    transformOrigin: `${zoomPos.x}% ${zoomPos.y}%`,
+                                    transform: isZoomed ? 'scale(2)' : 'scale(1)',
+                                }}
+                                priority
+                                sizes="(max-width: 768px) 100vw, 50vw"
+                            />
+                        </div>
+                    </div>
+
+                    {/* Right Side - Product Details */}
+                    <div className="w-full md:w-1/2 p-6 md:p-8 flex flex-col">
+
+                        {/* Header Info */}
+                        <div className="mb-4 pr-8">
+                            {product?.brand && (
+                                <span className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-2 block">
+                                    {product.brand}
                                 </span>
                             )}
-                        </div>
-                        <p className="text-xs text-gray-400 font-medium">
-                            Precio exclusivo tienda virtual
-                        </p>
-                    </div>
+                            <h2 className="text-xl md:text-2xl font-bold text-gray-900 leading-snug mb-3 break-words">
+                                {product?.name}
+                            </h2>
 
-                    <div className="w-full h-px bg-gray-100 mb-6"></div>
-
-                    {/* Controls Section */}
-                    <div className="space-y-6 flex-grow">
-
-                        {/* Variants would go here */}
-
-                        {/* Quantity & Stock */}
-                        <div className="space-y-3">
-                            <div className="flex items-center justify-between">
-                                <label className="text-sm font-bold text-gray-900 uppercase tracking-wide">
-                                    Cantidad
-                                </label>
-                                {!isOutOfStock && (
-                                    <span className="text-xs text-green-600 font-semibold bg-green-50 px-2 py-1 rounded-full">
-                                        Disponible
+                            <div className="flex items-end gap-2 mb-1">
+                                <span className="text-3xl font-extrabold text-[var(--color-pharma-green)] tracking-tight">
+                                    {priceFmt.format(currentPrice)}
+                                </span>
+                                {product?.regularPrice > currentPrice && (
+                                    <span className="text-base text-gray-400 line-through mb-1 font-medium">
+                                        {priceFmt.format(product.regularPrice)}
                                     </span>
                                 )}
                             </div>
+                            <p className="text-[10px] text-gray-400 font-medium">
+                                Precio exclusivo tienda virtual
+                            </p>
 
-                            <div className="flex items-center gap-4">
-                                <div className="flex items-center bg-gray-50 border border-gray-200 rounded-full px-1 py-1 w-fit shadow-sm">
-                                    <button
-                                        onClick={() => setQuantity(Math.max(1, quantity - 1))}
-                                        disabled={quantity <= 1}
-                                        className="w-10 h-10 flex items-center justify-center rounded-full bg-white text-gray-600 hover:text-[var(--color-pharma-blue)] hover:shadow-md transition-all disabled:opacity-50 disabled:shadow-none"
-                                    >
-                                        <span className="text-xl font-medium mb-1">−</span>
-                                    </button>
-                                    <span className="w-12 text-center font-bold text-lg text-gray-900">{quantity}</span>
-                                    <button
-                                        onClick={() => {
-                                            const maxStock = variationStock || 999;
-                                            setQuantity(Math.min(maxStock, quantity + 1));
-                                        }}
-                                        disabled={variationStock !== undefined && quantity >= variationStock}
-                                        className="w-10 h-10 flex items-center justify-center rounded-full bg-[var(--color-pharma-blue)] text-white hover:bg-[#003d99] hover:shadow-md transition-all disabled:opacity-50 disabled:bg-gray-200 disabled:text-gray-400 disabled:shadow-none"
-                                    >
-                                        <span className="text-xl font-medium mb-1">+</span>
-                                    </button>
+                            {/* Cold Chain Alert */}
+                            <div className="mt-3">
+                                <ColdChainAlert categories={product?.categories || []} product={product} />
+                            </div>
+                        </div>
+
+                        <div className="w-full h-px bg-gray-100 mb-4"></div>
+
+                        {/* Controls Section */}
+                        <div className="space-y-4">
+                            {/* Quantity & Stock */}
+                            <div className="space-y-2">
+                                <div className="flex items-center justify-between">
+                                    <label className="text-[10px] font-bold text-gray-900 uppercase tracking-wide">
+                                        Cantidad
+                                    </label>
+                                    {!isOutOfStock && (
+                                        <span className="text-[10px] text-green-600 font-semibold bg-green-50 px-2 py-0.5 rounded-full">
+                                            Disponible
+                                        </span>
+                                    )}
+                                </div>
+
+                                <div className="flex items-center gap-3">
+                                    <div className="flex items-center bg-gray-50 border border-gray-200 rounded-full px-1 py-1 w-fit shadow-sm">
+                                        <button
+                                            onClick={() => setQuantity(Math.max(1, quantity - 1))}
+                                            disabled={quantity <= 1}
+                                            className="w-8 h-8 flex items-center justify-center rounded-full bg-white text-gray-600 hover:text-[var(--color-pharma-blue)] hover:shadow-md transition-all disabled:opacity-50 disabled:shadow-none"
+                                        >
+                                            <span className="text-lg font-medium mb-0.5">−</span>
+                                        </button>
+                                        <span className="w-10 text-center font-bold text-base text-gray-900">{quantity}</span>
+                                        <button
+                                            onClick={() => {
+                                                const maxStock = variationStock || 999;
+                                                setQuantity(Math.min(maxStock, quantity + 1));
+                                            }}
+                                            disabled={variationStock !== undefined && quantity >= variationStock}
+                                            className="w-8 h-8 flex items-center justify-center rounded-full bg-[var(--color-pharma-blue)] text-white hover:bg-[#003d99] hover:shadow-md transition-all disabled:opacity-50 disabled:bg-gray-200 disabled:text-gray-400 disabled:shadow-none"
+                                        >
+                                            <span className="text-lg font-medium mb-0.5">+</span>
+                                        </button>
+                                    </div>
                                 </div>
                             </div>
                         </div>
-                    </div>
 
-                    {/* Actions Footer */}
-                    <div className="mt-8 space-y-3">
-                        <button
-                            onClick={handleAddToCart}
-                            disabled={isOutOfStock}
-                            className={`w-full py-4 bg-[var(--color-pharma-blue)] hover:bg-[#0044b3] text-white text-lg font-bold rounded-2xl transition-all shadow-lg shadow-blue-900/10 hover:shadow-blue-900/20 hover:-translate-y-0.5 flex items-center justify-center gap-3 ${isOutOfStock ? 'opacity-50 cursor-not-allowed grayscale' : ''}`}
-                        >
-                            <ShoppingCart className="w-6 h-6" />
-                            <span>{isOutOfStock ? 'Producto Agotado' : 'Agregar al carrito'}</span>
-                        </button>
+                        {/* Actions Footer - Fixed Spacing */}
+                        <div className="mt-6 flex flex-col gap-3">
+                            <button
+                                onClick={handleAddToCart}
+                                disabled={isOutOfStock}
+                                className={`w-full py-3 bg-[var(--color-pharma-blue)] hover:bg-[#0044b3] text-white text-base font-bold rounded-xl transition-all shadow-lg shadow-blue-900/10 hover:shadow-blue-900/20 hover:-translate-y-0.5 flex items-center justify-center gap-2 ${isOutOfStock ? 'opacity-50 cursor-not-allowed grayscale' : ''}`}
+                            >
+                                <ShoppingCart className="w-5 h-5" />
+                                <span>{isOutOfStock ? 'Producto Agotado' : 'Agregar al carrito'}</span>
+                            </button>
 
-                        <Link
-                            href={`/${product?.slug}`}
-                            onClick={onClose}
-                            className="w-full py-3 bg-white border-2 border-[var(--color-pharma-blue)] text-[var(--color-pharma-blue)] hover:bg-blue-50 text-sm font-bold rounded-xl transition-all flex items-center justify-center shadow-sm hover:shadow-md"
-                        >
-                            Ver todos los detalles del producto
-                        </Link>
+                            <Link
+                                href={`/${product?.slug}`}
+                                onClick={onClose}
+                                className="w-full py-2.5 bg-white border border-[var(--color-pharma-blue)] text-[var(--color-pharma-blue)] hover:bg-blue-50 text-xs font-bold rounded-lg transition-all flex items-center justify-center"
+                            >
+                                Ver todos los detalles
+                            </Link>
+                        </div>
                     </div>
                 </div>
+
+                {/* Specs Section - Centered & Compact */}
+                <div className="border-t border-gray-100 bg-gray-50 px-6 py-4 shrink-0">
+                    <div className="max-w-4xl mx-auto w-full grid grid-cols-2 md:grid-cols-4 gap-y-3 gap-x-8 text-[10px] md:text-xs">
+                        <div className="flex flex-col items-start text-left">
+                            <span className="font-bold text-gray-400 uppercase tracking-wide mb-0.5">Marca</span>
+                            <span className="font-semibold text-gray-700 truncate w-full">{product?.brand || 'N/A'}</span>
+                        </div>
+                        <div className="flex flex-col items-start text-left">
+                            <span className="font-bold text-gray-400 uppercase tracking-wide mb-0.5">Presentación</span>
+                            <span className="font-semibold text-gray-700 uppercase">UNIDAD</span>
+                        </div>
+                        <div className="flex flex-col items-start text-left">
+                            <span className="font-bold text-gray-400 uppercase tracking-wide mb-0.5">ID Invima</span>
+                            <span className="font-semibold text-gray-700 truncate w-full">{product?.invima || 'N/A'}</span>
+                        </div>
+                        <div className="flex flex-col items-start text-left">
+                            <span className="font-bold text-gray-400 uppercase tracking-wide mb-0.5">Tipo</span>
+                            <span className="font-semibold text-gray-700 uppercase">{product?.productType || 'N/A'}</span>
+                        </div>
+                    </div>
+                </div>
+
             </div>
         </div>
     );

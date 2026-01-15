@@ -11,10 +11,59 @@ import ProductCard from '@/components/product/ProductCard';
 
 import { auth } from '@/lib/auth';
 
-export default function CheckoutForm() {
+interface CheckoutFormProps {
+    shippingRules: import('@/lib/shipping').ShippingRule[];
+}
+
+
+
+// Lista de departamentos para el selector (Misma lista que en ShippingCalculator o importada)
+// Por simplicidad y consistencia, la defino aquí también o podría importarse si se centraliza.
+const COLOMBIA_STATES = [
+    { code: 'CO-AMA', name: 'Amazonas' },
+    { code: 'CO-ANT', name: 'Antioquia' },
+    { code: 'CO-ARA', name: 'Arauca' },
+    { code: 'CO-ATL', name: 'Atlántico' },
+    { code: 'CO-BOL', name: 'Bolívar' },
+    { code: 'CO-BOY', name: 'Boyacá' },
+    { code: 'CO-CAL', name: 'Caldas' },
+    { code: 'CO-CAQ', name: 'Caquetá' },
+    { code: 'CO-CAS', name: 'Casanare' },
+    { code: 'CO-CAU', name: 'Cauca' },
+    { code: 'CO-CES', name: 'Cesar' },
+    { code: 'CO-CHO', name: 'Chocó' },
+    { code: 'CO-COR', name: 'Córdoba' },
+    { code: 'CO-CUN', name: 'Cundinamarca' },
+    { code: 'CO-DC', name: 'Bogotá D.C.' },
+    { code: 'CO-GUA', name: 'Guainía' },
+    { code: 'CO-GUV', name: 'Guaviare' },
+    { code: 'CO-HUI', name: 'Huila' },
+    { code: 'CO-LAG', name: 'La Guajira' },
+    { code: 'CO-MAG', name: 'Magdalena' },
+    { code: 'CO-MET', name: 'Meta' },
+    { code: 'CO-NAR', name: 'Nariño' },
+    { code: 'CO-NSA', name: 'Norte de Santander' },
+    { code: 'CO-PUT', name: 'Putumayo' },
+    { code: 'CO-QUI', name: 'Quindío' },
+    { code: 'CO-RIS', name: 'Risaralda' },
+    { code: 'CO-SAP', name: 'San Andrés y Providencia' },
+    { code: 'CO-SAN', name: 'Santander' },
+    { code: 'CO-SUC', name: 'Sucre' },
+    { code: 'CO-TOL', name: 'Tolima' },
+    { code: 'CO-VAC', name: 'Valle del Cauca' },
+    { code: 'CO-VAU', name: 'Vaupés' },
+    { code: 'CO-VID', name: 'Vichada' }
+];
+
+export default function CheckoutForm({ shippingRules }: CheckoutFormProps) {
     const { items, cartTotal, removeItem, updateQuantity, clearCart } = useCart();
     const [isLoading, setIsLoading] = useState(false);
-    const [shippingZone, setShippingZone] = useState('');
+
+    // Shipping State
+    const [selectedState, setSelectedState] = useState('');
+    const [shippingCost, setShippingCost] = useState(0);
+    const [shippingMethodName, setShippingMethodName] = useState('');
+
     const [customerData, setCustomerData] = useState({
         firstName: '',
         lastName: '',
@@ -26,61 +75,50 @@ export default function CheckoutForm() {
         state: '',
     });
 
+    // Update shipping cost when state changes
+    useEffect(() => {
+        if (!selectedState) {
+            setShippingCost(0);
+            setShippingMethodName('');
+            return;
+        }
+
+        // 1. Find matched zone
+        let zone = shippingRules.find(r => r.locations.includes(selectedState));
+
+        // 2. Default zone fallback
+        if (!zone) {
+            zone = shippingRules.find(r => r.zoneId === 0 || r.locations.length === 0);
+            if (zone) console.log("Using Default Zone:", zone.zoneName);
+        }
+
+        if (zone && zone.methods.length > 0) {
+            // Select first method by default (Logic can be improved to allow selection)
+            const method = zone.methods[0];
+            setShippingCost(method.cost);
+            setShippingMethodName(method.title);
+        } else {
+            // No shipping available
+            setShippingCost(0);
+            setShippingMethodName('Sin cobertura');
+            toast.error("No hay envíos disponibles para esta zona");
+        }
+    }, [selectedState, shippingRules]);
+
     // Pre-fill data if logged in
     useEffect(() => {
         if (auth.isAuthenticated()) {
             const user = auth.getUser();
             if (user) {
-                // Fetch full profile if possible or just use basic data
-                // For now, basic data from localStorage
                 setCustomerData(prev => ({
                     ...prev,
                     firstName: user.name?.split(' ')[0] || '',
                     lastName: user.name?.split(' ').slice(1).join(' ') || '',
                     email: user.email || '',
-                    // username: user.username
                 }));
-
-                // Optional: Fetch full address from API if we want to be fancy
-                // fetch(`/api/customer?id=${user.id}`).then(...)
             }
         }
     }, []);
-
-    // Shipping Logic (Preserved)
-    const [shippingCost, setShippingCost] = useState(0);
-    const totalQuantity = items.reduce((acc, item) => acc + item.quantity, 0);
-    const totalWeight = totalQuantity * 0.5;
-
-    useEffect(() => {
-        if (cartTotal > 300000) {
-            setShippingCost(0);
-        } else {
-            const baseRates = {
-                recoger: 0,
-                bogota: 10000,
-                cercanos: 15000,
-                nacional: 25000,
-                costa_atlantica: 25000
-            };
-            const additionalRates = {
-                recoger: 0,
-                bogota: 3000,
-                cercanos: 3000,
-                nacional: 8000,
-                costa_atlantica: 8000
-            };
-
-            let cost = baseRates[shippingZone as keyof typeof baseRates] ?? 0;
-
-            // Weight markup
-            if (totalWeight > 3 && shippingZone !== 'recoger' && shippingZone) {
-                const extraWeight = Math.ceil(totalWeight - 3);
-                cost += extraWeight * (additionalRates[shippingZone as keyof typeof additionalRates] ?? 0);
-            }
-            setShippingCost(cost);
-        }
-    }, [cartTotal, totalQuantity, shippingZone, totalWeight]);
 
     const finalTotal = cartTotal + shippingCost;
 
@@ -89,10 +127,16 @@ export default function CheckoutForm() {
     };
 
     const handleCheckout = () => {
-        if (!shippingZone) {
-            toast.error("Selecciona una zona de envío");
+        if (!selectedState) {
+            toast.error("Selecciona un departamento de envío");
             return;
         }
+        if (shippingMethodName === 'Sin cobertura') {
+            toast.error("No tenemos cobertura en esta zona");
+            return;
+        }
+
+        // ... validation continued
         if (!customerData.firstName || !customerData.email || !customerData.documentId) {
             toast.error("Completa tus datos personales");
             return;
@@ -100,7 +144,6 @@ export default function CheckoutForm() {
 
         setIsLoading(true);
         try {
-            // Handover URL (Legacy/Backend)
             // Handover URL (Legacy/Backend)
             const baseUrl = (process.env.NEXT_PUBLIC_WORDPRESS_URL || "https://tienda.pharmaplus.com.co").replace(/\/$/, "") + "/finalizar-compra/";
 
@@ -110,15 +153,20 @@ export default function CheckoutForm() {
             }).join(',');
 
             const params = new URLSearchParams();
-            params.append('saprix_handover', 'true'); // Required by backend likely
+            params.append('saprix_handover', 'true');
             params.append('items', itemsString);
-            params.append('shipping_zone', shippingZone);
+
+            // Send selected state as shipping zone context
+            params.append('shipping_zone', selectedState); // We send the state code now
+            params.append('shipping_method', shippingMethodName); // Optional: inform backend
+
             params.append('billing_first_name', customerData.firstName);
             params.append('billing_last_name', customerData.lastName);
             params.append('billing_email', customerData.email);
             params.append('billing_phone', customerData.phone);
             params.append('billing_address_1', customerData.address);
             params.append('billing_city', customerData.city);
+            params.append('billing_state', selectedState); // Important for Woo
             params.append('documentId', customerData.documentId);
 
             const handoverUrl = `${baseUrl}?${params.toString()}`;
@@ -129,7 +177,7 @@ export default function CheckoutForm() {
 
             setTimeout(() => {
                 window.location.href = handoverUrl;
-            }, 1000); // 1s delay
+            }, 1000);
 
         } catch (error) {
             setIsLoading(false);
@@ -190,39 +238,48 @@ export default function CheckoutForm() {
                 <div className="bg-white p-6 rounded-2xl shadow-sm border border-gray-100">
                     <h2 className="text-lg font-bold text-[var(--color-pharma-blue)] mb-4 flex items-center gap-2">
                         <span className="bg-[var(--color-pharma-blue)] text-white w-6 h-6 rounded-full flex items-center justify-center text-xs">2</span>
-                        Dirección de Envío
+                        Datos de Envío
                     </h2>
                     <div className="space-y-4">
                         <div className="space-y-1">
-                            <label className="text-xs font-bold uppercase text-gray-500">Zona de Envío</label>
-                            <select
-                                value={shippingZone}
-                                onChange={(e) => setShippingZone(e.target.value)}
-                                className="w-full p-2 border border-gray-200 rounded-lg focus:border-[var(--color-pharma-blue)] outline-none bg-white"
-                            >
-                                <option value="">-- Seleccionar --</option>
-                                <option value="bogota">Bogotá D.C.</option>
-                                <option value="cercanos">Alrededores (Sabana)</option>
-                                <option value="nacional">Nacional</option>
-                                <option value="recoger">Recoger en Tienda (Gratis)</option>
-                            </select>
+                            <label className="text-xs font-bold uppercase text-gray-500">Ubicación (Departamento)</label>
+                            <div className="relative">
+                                <MapPin className="absolute left-3 top-3 w-5 h-5 text-gray-400 pointer-events-none" />
+                                <select
+                                    value={selectedState}
+                                    onChange={(e) => setSelectedState(e.target.value)}
+                                    className="w-full pl-10 pr-4 py-2 border border-gray-200 rounded-lg focus:border-[var(--color-pharma-blue)] outline-none bg-white font-medium"
+                                >
+                                    <option value="">-- Seleccionar Departamento --</option>
+                                    {COLOMBIA_STATES.map(st => (
+                                        <option key={st.code} value={st.code}>{st.name}</option>
+                                    ))}
+                                </select>
+                            </div>
                         </div>
 
-                        {shippingZone && shippingZone !== 'recoger' && (
+                        {selectedState && (
                             <>
-                                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                                    <div className="space-y-1">
-                                        <label className="text-xs font-bold uppercase text-gray-500">Departamento</label>
-                                        <input type="text" name="state" value={customerData.state} onChange={handleInputChange} className="w-full p-2 border border-gray-200 rounded-lg outline-none" />
+                                <div className="p-3 bg-blue-50/50 rounded-lg border border-blue-100 flex items-center justify-between">
+                                    <div className="flex items-center gap-2">
+                                        <Truck className="w-5 h-5 text-[var(--color-pharma-blue)]" />
+                                        <div>
+                                            <p className="text-sm font-bold text-gray-800">{shippingMethodName || 'Calculando...'}</p>
+                                            <p className="text-xs text-gray-500">Tarifa oficial</p>
+                                        </div>
                                     </div>
-                                    <div className="space-y-1">
-                                        <label className="text-xs font-bold uppercase text-gray-500">Ciudad</label>
-                                        <input type="text" name="city" value={customerData.city} onChange={handleInputChange} className="w-full p-2 border border-gray-200 rounded-lg outline-none" />
+                                    <div className="font-bold text-[var(--color-pharma-blue)]">
+                                        {shippingCost === 0 ? 'Gratis' : `$${shippingCost.toLocaleString()}`}
                                     </div>
                                 </div>
+
                                 <div className="space-y-1">
-                                    <label className="text-xs font-bold uppercase text-gray-500">Dirección Completa</label>
-                                    <input type="text" name="address" value={customerData.address} onChange={handleInputChange} placeholder="Calle 123 # 45 - 67, Apto 101" className="w-full p-2 border border-gray-200 rounded-lg outline-none" />
+                                    <label className="text-xs font-bold uppercase text-gray-500">Ciudad / Municipio</label>
+                                    <input type="text" name="city" value={customerData.city} onChange={handleInputChange} className="w-full p-2 border border-gray-200 rounded-lg outline-none" placeholder="Ej: Medellín" required />
+                                </div>
+                                <div className="space-y-1">
+                                    <label className="text-xs font-bold uppercase text-gray-500">Dirección Exacta</label>
+                                    <input type="text" name="address" value={customerData.address} onChange={handleInputChange} placeholder="Calle 123 # 45 - 67, Apto 101" className="w-full p-2 border border-gray-200 rounded-lg outline-none" required />
                                 </div>
                             </>
                         )}
@@ -274,7 +331,7 @@ export default function CheckoutForm() {
 
                     <button
                         onClick={handleCheckout}
-                        disabled={isLoading || !shippingZone}
+                        disabled={isLoading || !selectedState}
                         className="w-full py-4 bg-[var(--color-pharma-green)] text-white font-bold rounded-lg shadow-md hover:bg-green-700 transition-all flex items-center justify-center gap-2 disabled:bg-gray-300 disabled:cursor-not-allowed"
                     >
                         {isLoading ? 'Procesando...' : 'Pagar Ahora'}

@@ -111,6 +111,7 @@ export default function LiveSearch() {
 
                 <button
                     type="submit"
+                    aria-label="Buscar productos"
                     className="absolute right-1.5 top-1.5 h-9 w-9 bg-[var(--color-pharma-green)] hover:bg-[#007a38] rounded-full flex items-center justify-center text-white transition-colors shadow-sm"
                 >
                     {isLoading ? (

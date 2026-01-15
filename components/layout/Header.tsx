@@ -4,7 +4,7 @@ import Link from 'next/link';
 import Image from 'next/image';
 import {
     Search, ShoppingCart, User, MapPin, ChevronDown,
-    Phone, Mail, Tag, Heart, Store, Pill, Menu, CreditCard, Snowflake, FileText, HelpCircle
+    Phone, Mail, Tag, Heart, Store, Pill, Menu, CreditCard, Snowflake, FileText, HelpCircle, Truck
 } from 'lucide-react';
 import { useState, useRef, useEffect } from 'react';
 import { CategoryTree } from '@/types/woocommerce';
@@ -13,14 +13,18 @@ import LiveSearch from '@/components/search/LiveSearch';
 import CartBadge from './CartBadge';
 import AccountButton from './AccountButton';
 import { useGeolocation } from '@/hooks/useGeolocation';
+import ShippingModal from '@/components/shipping/ShippingModal';
+import { ShippingRule } from '@/lib/shipping';
 
 interface HeaderProps {
     categories?: CategoryTree[];
+    shippingRules?: ShippingRule[];
 }
 
-export default function Header({ categories = [] }: HeaderProps) {
+export default function Header({ categories = [], shippingRules = [] }: HeaderProps) {
     const [isCategoryOpen, setCategoryOpen] = useState(false);
     const [isFinanciamientoOpen, setFinanciamientoOpen] = useState(false);
+    const [isShippingModalOpen, setShippingModalOpen] = useState(false); // Shipping Modal
     const [isMobileMenuOpen, setMobileMenuOpen] = useState(false); // Mobile State
     const [activeMobileCategory, setActiveMobileCategory] = useState<number | null>(null);
     const [hoveredCategoryId, setHoveredCategoryId] = useState<number | null>(null);
@@ -129,7 +133,7 @@ export default function Header({ categories = [] }: HeaderProps) {
                             <AccountButton />
 
                             {/* Cart */}
-                            <Link href="/carrito" className="relative group">
+                            <Link href="/carrito" className="relative group" aria-label="Ver carrito de compras">
                                 <div className="w-10 h-10 rounded-full border border-gray-200 flex items-center justify-center text-gray-600 group-hover:bg-blue-50 group-hover:text-[var(--color-pharma-blue)] group-hover:border-blue-200 transition-all">
                                     <ShoppingCart className="w-5 h-5" />
                                 </div>
@@ -326,10 +330,7 @@ export default function Header({ categories = [] }: HeaderProps) {
                                 <span>Mundo Ofertas</span>
                             </Link>
 
-                            <Link href="/wishlist" className="flex items-center gap-2 text-[13px] font-medium text-white hover:text-white whitespace-nowrap transition-colors">
-                                <Heart className="w-4 h-4 text-white" />
-                                <span>Mis Favoritos</span>
-                            </Link>
+
 
                             <Link href="/pastillero" className="flex items-center gap-2 text-[13px] font-medium text-white hover:text-white whitespace-nowrap transition-colors">
                                 <Pill className="w-4 h-4 text-white" />
@@ -341,15 +342,25 @@ export default function Header({ categories = [] }: HeaderProps) {
                                 <span>Tiendas</span>
                             </Link>
 
+                            <button
+                                onClick={() => setShippingModalOpen(true)}
+                                className="flex items-center gap-2 text-[13px] font-medium text-white hover:text-white whitespace-nowrap transition-colors"
+                            >
+                                <Truck className="w-4 h-4 text-white" />
+                                <span>Cotizar Envío</span>
+                            </button>
+
+                            <Link href="/blog" className="flex items-center gap-2 text-[13px] font-medium text-white hover:text-white whitespace-nowrap transition-colors">
+                                <FileText className="w-4 h-4 text-white" />
+                                <span>Blog Saludable</span>
+                            </Link>
+
                             <Link href="/politicas/preguntas-frecuentes" className="flex items-center gap-2 text-[13px] font-medium text-white hover:text-white whitespace-nowrap transition-colors">
                                 <HelpCircle className="w-4 h-4 text-white" />
                                 <span>Preguntas Frecuentes</span>
                             </Link>
 
-                            <Link href="/politicas" className="flex items-center gap-2 text-[13px] font-medium text-white hover:text-white whitespace-nowrap transition-colors">
-                                <FileText className="w-4 h-4 text-white" />
-                                <span>Políticas</span>
-                            </Link>
+
                         </nav>
 
                         {/* Financiamiento Dropdown (Replaces Pharma Prime) */}
@@ -579,6 +590,10 @@ export default function Header({ categories = [] }: HeaderProps) {
                                         <Tag className="w-4 h-4 text-[var(--color-pharma-blue)]" />
                                         Mundo Ofertas
                                     </Link>
+                                    <Link href="/blog" onClick={() => setMobileMenuOpen(false)} className="flex items-center gap-3 px-4 py-3 hover:bg-gray-50 text-gray-700 text-sm">
+                                        <FileText className="w-4 h-4 text-[var(--color-pharma-blue)]" />
+                                        Blog Saludable
+                                    </Link>
                                     <Link href="/tiendas" onClick={() => setMobileMenuOpen(false)} className="flex items-center gap-3 px-4 py-3 hover:bg-gray-50 text-gray-700 text-sm">
                                         <MapPin className="w-4 h-4 text-[var(--color-pharma-blue)]" />
                                         Tiendas
@@ -590,7 +605,11 @@ export default function Header({ categories = [] }: HeaderProps) {
                 )}
             </AnimatePresence>
 
-
+            <ShippingModal
+                isOpen={isShippingModalOpen}
+                onClose={() => setShippingModalOpen(false)}
+                rules={shippingRules}
+            />
         </header>
     );
 }

@@ -8,6 +8,7 @@ import BeautySection from "@/components/home/BeautySection";
 import HealthSection from "@/components/home/HealthSection";
 import FAQSection from "@/components/home/FAQSection";
 import { getProducts } from "@/lib/woocommerce";
+import { getShippingRates } from '@/lib/shipping';
 
 // Professional Hero Slides with local images
 const heroSlides: HeroSlide[] = [
@@ -71,7 +72,13 @@ export default async function HomePage() {
   // 4. Beauty
   // 5. Health (with complex fallback)
 
-  const [featuredResult, flashDealsProducts, coldChainResult, beautyResult, healthResult] = await Promise.all([
+  const [
+    featuredResult,
+    flashDealsProducts,
+    coldChainResult,
+    beautyResult,
+    healthResult
+  ] = await Promise.all([
     // 1. Featured Products
     (async () => {
       let res = await getProducts({ perPage: 12, featured: true, orderby: 'popularity' });
@@ -113,8 +120,10 @@ export default async function HomePage() {
       if (res.products.length > 0) return res;
 
       return await getProducts({ search: 'medicamento', perPage: 10 });
-    })()
+    })(),
   ]);
+
+
 
   return (
     <div className="w-full bg-[var(--color-bg-light)]">
@@ -126,6 +135,8 @@ export default async function HomePage() {
 
       {/* Category Icons */}
       <CategoryIconsSection />
+
+
 
       {/* Recommended Section (Complementa tu bienestar) */}
       <RecommendedSection

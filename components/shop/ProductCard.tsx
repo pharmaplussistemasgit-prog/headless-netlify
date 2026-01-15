@@ -1,4 +1,5 @@
 import BaseProductCard from "@/components/product/ProductCard";
+import { isColdChain } from "@/lib/coldChain";
 
 export type ProductSummary = {
   id: number;
@@ -10,6 +11,7 @@ export type ProductSummary = {
   is_new?: boolean;
   type?: string;
   images?: string[];
+  categories?: any[];
 };
 
 // Re-export con props adaptadas al `ProductCard` existente
@@ -36,7 +38,7 @@ export function ProductCard({ product }: { product: ProductSummary }) {
     invima: null,
     productType: product.type || null,
     requiresRx: false,
-    isRefrigerated: false,
+    isRefrigerated: isColdChain(product.categories, product),
     discountPercentage: isOnSale ? Math.round(((regularPrice - price) / regularPrice) * 100) : null,
   };
 

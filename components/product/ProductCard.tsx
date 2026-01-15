@@ -10,6 +10,7 @@ import { MappedProduct } from "@/types/product";
 import { useQuickView } from "@/context/QuickViewContext";
 import { useWishlist } from "@/context/WishlistContext";
 import { Heart } from "lucide-react";
+import { isColdChain } from "@/lib/coldChain";
 
 interface ProductCardProps {
   product: MappedProduct;
@@ -47,7 +48,7 @@ export default function ProductCard({ product }: ProductCardProps) {
   return (
     <>
       <Card
-        className="h-full border border-gray-200 shadow-[0_2px_8px_rgba(0,0,0,0.05)] hover:shadow-[0_8px_24px_rgba(0,0,0,0.12)] transition-all duration-300 group rounded-xl bg-white overflow-hidden flex flex-col cursor-pointer"
+        className="h-full border border-gray-200 shadow-[0_2px_8px_rgba(0,0,0,0.05)] hover:shadow-[0_8px_24px_rgba(0,0,0,0.12)] transition-all duration-300 group rounded-xl bg-white overflow-hidden flex flex-col cursor-pointer relative"
         onClick={handleOpenModal}
       >
 
@@ -74,9 +75,9 @@ export default function ProductCard({ product }: ProductCardProps) {
               -{product.discountPercentage}%
             </span>
           )}
-          {product.isRefrigerated && (
+          {isColdChain(product.categories, product) && (
             <span className="bg-blue-50/90 backdrop-blur-sm text-blue-600 text-[10px] font-bold px-2 py-0.5 rounded flex items-center gap-1 shadow-sm border border-blue-100">
-              <Snowflake className="w-3 h-3" /> Frío
+              <Snowflake className="w-3 h-3" /> Cadena de Frío
             </span>
           )}
         </div>

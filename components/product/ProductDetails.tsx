@@ -8,6 +8,7 @@ import { useCart } from '@/context/CartContext';
 import { toast } from 'sonner';
 import { MappedProduct } from '@/types/product';
 import RecommendedSection from '@/components/home/RecommendedSection';
+import ColdChainAlert from './ColdChainAlert';
 
 interface ProductDetailsProps {
     product: MappedProduct;
@@ -137,6 +138,9 @@ export default function ProductDetails({ product, relatedProducts = [], alsoView
                                     <span className="text-xs text-gray-500 mt-1 font-medium">
                                         Unidad a ${(product.price / 1).toLocaleString('es-CO')}
                                     </span>
+                                    <div className="mt-4">
+                                        <ColdChainAlert categories={product.categories || []} product={product} />
+                                    </div>
                                 </div>
 
                                 {/* Divider */}
