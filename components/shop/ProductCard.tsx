@@ -33,6 +33,7 @@ export function ProductCard({ product }: { product: ProductSummary }) {
     showExactStock: false,
     images: product.images && product.images.length > 0 ? product.images : [product.image_url],
     categories: [],
+    tags: [],
     shortDescription: '',
     brand: null,
     invima: null,
