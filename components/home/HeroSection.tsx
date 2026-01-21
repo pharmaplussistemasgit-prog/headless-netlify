@@ -98,6 +98,7 @@ export default function HeroSection({ slides, featuredProds = [] }: HeroSectionP
                                             alt={slide.title || 'PharmaPlus Offer'}
                                             fill
                                             priority={index === 0}
+                                            fetchPriority={index === 0 ? "high" : "auto"}
                                             className="object-cover object-center"
                                             sizes="(max-width: 1024px) 100vw, 70vw"
                                         />

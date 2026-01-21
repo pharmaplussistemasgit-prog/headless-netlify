@@ -2,13 +2,24 @@ import HeroSection, { HeroSlide } from "@/components/home/HeroSection";
 import CategoryIconsSection from "@/components/home/CategoryIconsSection";
 import FeaturedProducts from "@/components/home/FeaturedProducts";
 import ColdChainSection from "@/components/home/ColdChainSection";
-import FlashDeals from "@/components/home/FlashDeals";
 import RecommendedSection from "@/components/home/RecommendedSection";
-import BeautySection from "@/components/home/BeautySection";
-import HealthSection from "@/components/home/HealthSection";
-import FAQSection from "@/components/home/FAQSection";
 import { getProducts } from "@/lib/woocommerce";
 import { getShippingRates } from '@/lib/shipping';
+import dynamic from 'next/dynamic';
+
+// Lazy load below-the-fold sections for better performance
+const FlashDeals = dynamic(() => import('@/components/home/FlashDeals'), {
+  loading: () => <div className="h-96 animate-pulse bg-gray-100" />
+});
+const BeautySection = dynamic(() => import('@/components/home/BeautySection'), {
+  loading: () => <div className="h-96 animate-pulse bg-gray-100" />
+});
+const HealthSection = dynamic(() => import('@/components/home/HealthSection'), {
+  loading: () => <div className="h-96 animate-pulse bg-gray-100" />
+});
+const FAQSection = dynamic(() => import('@/components/home/FAQSection'), {
+  loading: () => <div className="h-64 animate-pulse bg-gray-100" />
+});
 
 // Enable ISR - revalidate every 1 minute for homepage (high traffic)
 export const revalidate = 60;
