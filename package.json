@@ -8,6 +8,10 @@
     "start": "next start",
     "lint": "eslint"
   },
+  "engines": {
+    "node": ">=20.9.0",
+    "npm": ">=10.0.0"
+  },
   "dependencies": {
     "@headlessui/react": "^2.2.9",
     "@iconify/react": "^6.0.2",
