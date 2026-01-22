@@ -15,7 +15,6 @@
   "dependencies": {
     "@headlessui/react": "^2.2.9",
     "@iconify/react": "^6.0.2",
-    "@netlify/functions": "^2.8.2",
     "@next/third-parties": "^16.1.1",
     "@radix-ui/react-dialog": "^1.1.15",
     "@radix-ui/react-slot": "^1.2.3",
@@ -44,7 +43,6 @@
     "uuid": "^13.0.0"
   },
   "devDependencies": {
-    "@netlify/plugin-nextjs": "^5.7.4",
     "@tailwindcss/postcss": "^4",
     "@tailwindcss/typography": "^0.5.19",
     "@types/node": "^20",
