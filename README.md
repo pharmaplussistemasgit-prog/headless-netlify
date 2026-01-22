@@ -30,6 +30,28 @@ npm start
 
 ---
 
+## ☁️ Deployment
+
+Este proyecto está optimizado para **Netlify** con el plugin `@netlify/plugin-nextjs`.
+
+### Deploy Rápido
+
+[![Deploy to Netlify](https://www.netlify.com/img/deploy/button.svg)](https://app.netlify.com/start/deploy)
+
+### Configuración Manual
+
+Ver la [Guía de Deployment en Netlify](./docs/technical/netlify-deployment.md) para instrucciones detalladas.
+
+**Características de Netlify:**
+- ✅ ISR (Incremental Static Regeneration) automático
+- ✅ Image Optimization (WebP/AVIF)
+- ✅ Deploy Previews para cada PR
+- ✅ Scheduled Functions (cron jobs)
+- ✅ Edge Functions para geolocalización
+- ✅ Security Headers configurados
+
+---
+
 ## 📚 Documentación
 
 La documentación completa del proyecto está organizada en la carpeta [`/docs`](./docs/):
@@ -145,10 +167,12 @@ RESEND_API_KEY=re_xxxxx
 
 ## 🔗 Enlaces Útiles
 
-- **[Sitio en Producción](https://headless-one-sigma.vercel.app/)**
+- **[Sitio en Producción](https://headless-one-sigma.vercel.app/)** (Migrar a Netlify)
 - **[Panel WordPress](https://tienda.pharmaplus.com.co/wp-admin)**
+- **[Documentación de Deployment](./docs/technical/netlify-deployment.md)**
 - **[Documentación Next.js](https://nextjs.org/docs)**
 - **[WooCommerce REST API](https://woocommerce.github.io/woocommerce-rest-api-docs/)**
+- **[Netlify Docs](https://docs.netlify.com/)**
 
 ---
 

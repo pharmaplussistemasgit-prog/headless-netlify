@@ -66,5 +66,7 @@ const nextConfig: NextConfig = {
   },
 };
 
-// Trigger Vercel Redeploy
+// Optimizado para Netlify con @netlify/plugin-nextjs
+// El plugin maneja automáticamente ISR, Image Optimization y Middleware
 export default nextConfig;
+

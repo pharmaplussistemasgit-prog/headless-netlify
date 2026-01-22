@@ -1,0 +1,14 @@
+# Redirects (Backup del netlify.toml)
+
+# Productos
+/productos              /tienda                 301
+/productos/page/*       /tienda                 301
+
+# Product URLs
+/product/:slug          /producto/:slug         301
+
+# Category URLs
+/category/:slug         /categoria/:slug        301
+
+# Rewrite interno (no cambia URL visible)
+/finalizar-compra       /checkout               200
